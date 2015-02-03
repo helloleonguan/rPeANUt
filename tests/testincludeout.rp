@@ -1,0 +1,16 @@
+0x50:
+main:
+	block #1
+	block #2
+	block #4
+	block #8
+	block #16
+	block #32
+	block #64
+	block #128
+	block #256
+	block #512
+	block #1024
+0x100:
+	block #"test"
+	jump main

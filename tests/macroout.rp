@@ -1,0 +1,8 @@
+0x100:
+labelTest:
+	add R2 R0 R1
+	jump labelTest
+
+block #123
+block #"#456 "
+block #"#123aa"

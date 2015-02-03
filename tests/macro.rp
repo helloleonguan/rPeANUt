@@ -1,0 +1,19 @@
+MACRO
+mac1 &argA &argB
+label&argA:
+	add &argB R0 R1
+	jump label&argA
+MEND
+
+macro
+mac2 &a &aa &aaa
+block &a
+block #"&aa "
+block #"&aaa"
+mend
+
+0x100:
+main:
+mac1 Test R2
+
+mac2 #123 #456 #678

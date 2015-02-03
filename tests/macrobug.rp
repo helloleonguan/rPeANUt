@@ -1,0 +1,8 @@
+macro
+buggy
+mend
+
+0x0100:
+load #hello R0
+buggy
+hello: halt

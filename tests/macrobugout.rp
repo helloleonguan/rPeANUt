@@ -1,0 +1,4 @@
+0x0100:
+	load #hello R0
+hello:
+	halt
