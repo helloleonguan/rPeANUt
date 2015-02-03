@@ -92,7 +92,7 @@ import java.util.prefs.Preferences;
 
 public class Peanut implements ActionListener, LayoutManager,
 		WindowFocusListener {
-	static final String version = "2.4";
+	static final String version = "2.5";
 
 	JFrame jframe;
 	JMenuBar bar;

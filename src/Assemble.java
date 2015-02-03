@@ -384,7 +384,7 @@ public class Assemble {
 								throw new ParseException(li, "unknown " + ins
 										+ " attributes ");
 							}
-						} else if (ins.equals("include")) {
+						} else if (ins.equals("#include")) {
 							Attribute a1 = Attribute.parse(inss, li);
 							if (a1.type == AttType.STRING) {
 								try {
