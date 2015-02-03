@@ -1,0 +1,9 @@
+#!/bin/bash
+
+mkdir tmp
+cd tmp
+cp /home/ericm/courses/java/rpeanut/src/* .
+jar cmf /home/ericm/courses/java/rpeanut/release/MANIFEST.MF /home/ericm/courses/java/rpeanut/release/rPeANUt$1.jar .
+cd ..
+rm -r tmp
+

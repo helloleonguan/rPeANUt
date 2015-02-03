@@ -1,0 +1,13 @@
+creating a new release.
+
+1.  make new dir cd to it
+cp ~/workspace/peanut2/bin/* .
+cp ~/workspace/peanut2/src/* .
+jar cmf ~/courses/ics/peanut2/MANIFEST.MF ~/courses/ics/peanut2/rPeANUt1.X.jar .
+
+
+
+New version at:
+https://rpeanut.googlecode.com/svn
+
+
