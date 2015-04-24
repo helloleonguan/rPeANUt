@@ -55,13 +55,20 @@ public class Word extends JTextField implements KeyListener {
 		this.setFont(wordfont);
 	}
 
-	public Word(int code, int r1, int r2, int rd, int add) {
+	/*public Word(int code, int r1, int r2, int rd, int add) {
 		value =  (((code & 0xF) << 28)  |
 				((r1 & 0xF) << 24)  |
 				((r2 & 0xF) << 20)  |
 				((rd & 0xF) << 16)  |
 				(add & 0xFFFF)) ;
 		this.setFont(wordfont);
+	}*/
+	static int build(int code, int r1, int r2, int rd, int add) {
+		return (((code & 0xF) << 28)  |
+				((r1 & 0xF) << 24)  |
+				((r2 & 0xF) << 20)  |
+				((rd & 0xF) << 16)  |
+				(add & 0xFFFF)) ;
 	}
 
 	public String toString() {

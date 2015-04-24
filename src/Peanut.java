@@ -95,15 +95,7 @@ public class Peanut implements ActionListener, LayoutManager,
 	static final String version = "2.5";
 
 	JFrame jframe;
-	JMenuBar bar;
-	JMenu fileMenu, editMenu, codeMenu;
-	JMenuItem newMenuItem, saveMenuItem, saveAsMenuItem, loadMenuItem,
-			loadlastMenuItem, exitMenuItem;
-	JMenuItem undoMenuItem, redoMenuItem, fontSizeMenuItem;
-	JMenuItem assembleMenuItem;
-	JMenuItem runMenuItem;
-	JMenuItem stepMenuItem;
-	JMenuItem stopMenuItem;
+	
 	JCheckBoxMenuItem echoInputItem, profileItem;
 	JMenuItem pipeMenuItem;
 	JMenuItem cacheMenuItem;
@@ -149,125 +141,56 @@ public class Peanut implements ActionListener, LayoutManager,
 				exit();
 			}
 		});
-		jframe.setExtendedState(jframe.getExtendedState()
-				| JFrame.MAXIMIZED_BOTH);
+		//jframe.setExtendedState(jframe.getExtendedState()
+		//		| JFrame.MAXIMIZED_BOTH);
 
 		prefs = Preferences.userNodeForPackage(Peanut.class);
-
+		
+		JMenuBar bar;
+		JMenu fileMenu, editMenu, codeMenu;
+		
 		bar = new JMenuBar();
-		fileMenu = new JMenu("File");
-
-		newMenuItem = new JMenuItem("New");
-		newMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
+		
+		fileMenu = new JMenu("File");	
+		createMenuItem(fileMenu, "New",NEW , KeyStroke.getKeyStroke(KeyEvent.VK_N,
 				ActionEvent.CTRL_MASK));
-		newMenuItem.setActionCommand(NEW);
-		newMenuItem.addActionListener(this);
-
-		loadMenuItem = new JMenuItem("Load");
-		loadMenuItem.setActionCommand(LOAD);
-		loadMenuItem.addActionListener(this);
-		loadMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L,
+		createMenuItem(fileMenu,"Load" , LOAD, KeyStroke.getKeyStroke(KeyEvent.VK_L,
 				ActionEvent.CTRL_MASK));
-
-		loadlastMenuItem = new JMenuItem("Load Last");
-		loadlastMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+		createMenuItem(fileMenu, "Load Last",LOADLAST , KeyStroke.getKeyStroke(KeyEvent.VK_O,
 				ActionEvent.CTRL_MASK));
-		loadlastMenuItem.setActionCommand(LOADLAST);
-		loadlastMenuItem.addActionListener(this);
-
-		saveMenuItem = new JMenuItem("Save");
-		saveMenuItem.setActionCommand(SAVE);
-		saveMenuItem.addActionListener(this);
-		saveMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+		createMenuItem(fileMenu,"Save" , SAVE, KeyStroke.getKeyStroke(KeyEvent.VK_S,
 				ActionEvent.CTRL_MASK));
-
-		saveAsMenuItem = new JMenuItem("Save As");
-		saveAsMenuItem.setActionCommand(SAVEAS);
-		saveAsMenuItem.addActionListener(this);
-		saveAsMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+		createMenuItem(fileMenu, "Save As", SAVEAS, KeyStroke.getKeyStroke(KeyEvent.VK_S,
 				InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
-
-		exitMenuItem = new JMenuItem("Exit");
-		exitMenuItem.setActionCommand(EXIT);
-		exitMenuItem.addActionListener(this);
-
+		createMenuItem(fileMenu,"Exit" ,EXIT , KeyStroke.getKeyStroke(KeyEvent.VK_Q,
+				ActionEvent.CTRL_MASK));
+		
 		editMenu = new JMenu("Edit");
-		exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
-				ActionEvent.CTRL_MASK));
-		undoMenuItem = new JMenuItem("Undo");
-		undoMenuItem.setActionCommand(UNDO);
-		undoMenuItem.addActionListener(this);
-
-		undoMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
-				ActionEvent.CTRL_MASK));
-
-		editMenu.add(undoMenuItem);
-
-		fontSizeMenuItem = new JMenuItem("Change Font Size");
-		fontSizeMenuItem.setActionCommand(FONTSIZE);
-		fontSizeMenuItem.addActionListener(this);
-		editMenu.add(fontSizeMenuItem);
-
+		createMenuItem(editMenu, "Undo", UNDO,KeyStroke.getKeyStroke(KeyEvent.VK_Z,
+				ActionEvent.CTRL_MASK) );
+		createMenuItem(editMenu,"Change Font Size" ,FONTSIZE , null);
+		
 		codeMenu = new JMenu("Code");
-
-		assembleMenuItem = new JMenuItem("Assemble");
-		assembleMenuItem.setActionCommand(ASSEMBLE);
-		assembleMenuItem.addActionListener(this);
-		assembleMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B,
+		createMenuItem(codeMenu,"Assemble" , ASSEMBLE,KeyStroke.getKeyStroke(KeyEvent.VK_B,
+				InputEvent.CTRL_DOWN_MASK) );
+		createMenuItem(codeMenu, "Run", RUN, KeyStroke.getKeyStroke(KeyEvent.VK_R,
+				InputEvent.CTRL_DOWN_MASK) );
+		createMenuItem(codeMenu,"Step" , STEP, KeyStroke.getKeyStroke(KeyEvent.VK_T,
 				InputEvent.CTRL_DOWN_MASK));
-		codeMenu.add(assembleMenuItem);
-
-		runMenuItem = new JMenuItem("Run");
-		runMenuItem.setActionCommand(RUN);
-		runMenuItem.addActionListener(this);
-		runMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
+		createMenuItem(codeMenu, "Stop", STOP, KeyStroke.getKeyStroke(KeyEvent.VK_P,
 				InputEvent.CTRL_DOWN_MASK));
-		codeMenu.add(runMenuItem);
 
-		stepMenuItem = new JMenuItem("Step");
-		stepMenuItem.setActionCommand(STEP);
-		stepMenuItem.addActionListener(this);
-		stepMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
-				InputEvent.CTRL_DOWN_MASK));
-		codeMenu.add(stepMenuItem);
-
-		stopMenuItem = new JMenuItem("Stop");
-		stopMenuItem.setActionCommand(STOP);
-		stopMenuItem.addActionListener(this);
-		stopMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
-				InputEvent.CTRL_DOWN_MASK));
-		codeMenu.add(stopMenuItem);
-
-		echoInputItem = new JCheckBoxMenuItem("Echo terminal input");
-		echoInputItem.setState(prefs.getBoolean("echo", false));
-		echoInputItem.setActionCommand(CHANGEECHO);
-		echoInputItem.addActionListener(this);
 		codeMenu.add(new JSeparator());
-		codeMenu.add(echoInputItem);
+		
+		createCheckBox(codeMenu,"Echo terminal input",CHANGEECHO, prefs.getBoolean("echo", false));
+		createCheckBox(codeMenu,"Profile", CHANGEPROFILE, prefs.getBoolean("profile", false));
+		
+		createMenuItem(codeMenu,"Input file to terminal" , PIPEFILE, null);
 
-		profileItem = new JCheckBoxMenuItem("Profile");
-		profileItem.setState(prefs.getBoolean("profile", false));
-		profileItem.setActionCommand(CHANGEPROFILE);
-		profileItem.addActionListener(this);
-		codeMenu.add(profileItem);
+		
+		createMenuItem(codeMenu,"Show cache simulator" , SHOWCACHE, null);
 
-		pipeMenuItem = new JMenuItem("Input file to terminal");
-		pipeMenuItem.setActionCommand(PIPEFILE);
-		pipeMenuItem.addActionListener(this);
-		codeMenu.add(pipeMenuItem);
-
-		cacheMenuItem = new JMenuItem("Show cache simulator");
-		cacheMenuItem.setActionCommand(SHOWCACHE);
-		cacheMenuItem.addActionListener(this);
-		codeMenu.add(cacheMenuItem);
-
-		fileMenu.add(newMenuItem);
-		fileMenu.add(loadMenuItem);
-		fileMenu.add(loadlastMenuItem);
-		fileMenu.add(saveMenuItem);
-		fileMenu.add(saveAsMenuItem);
-		fileMenu.add(exitMenuItem);
-
+		
 		bar.add(fileMenu);
 		bar.add(editMenu);
 		bar.add(codeMenu);
@@ -314,6 +237,25 @@ public class Peanut implements ActionListener, LayoutManager,
 
 		jframe.pack();
 		jframe.setVisible(true);
+	}
+
+
+	
+	private void createCheckBox(JMenu menu,  String name, String command, boolean state) {
+		JCheckBoxMenuItem item = new JCheckBoxMenuItem(name);
+		item.setState(state);
+		item.setActionCommand(command);
+		item.addActionListener(this);
+		menu.add(item);
+	}
+
+	
+	private void createMenuItem(JMenu menu, String name, String command, KeyStroke ks) {
+		JMenuItem mi = new JMenuItem(name);
+		mi.setActionCommand(command);
+		mi.addActionListener(this);
+		if (ks!=null) mi.setAccelerator(ks);
+		menu.add(mi);
 	}
 
 	public void actionPerformed(ActionEvent ae) {

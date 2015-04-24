@@ -132,16 +132,14 @@ public class Assemble {
 							int r2 = parsereg(inss, li);
 							int rd = parsereg(inss, li);
 
-							Word inst1 = new Word(code, r1, r2, rd, 0);
-							simulate.memory.set(curr, inst1.get());
-							D.p("setting memory : " + curr + " : " + inst1);
+							simulate.memory.set(curr,Word.build(code, r1, r2, rd, 0));
+							D.p("setting memory : " + curr + " : " + simulate.memory.get(curr));
 							curr++;
 						} else if ((code = codeU(ins)) != null) {
 							// neg, not, move
 							int r1 = parsereg(inss, li);
 							int rd = parsereg(inss, li);
-							Word inst1 = new Word(0xA, code, r1, rd, 0);
-							simulate.memory.set(curr, inst1.get());
+							simulate.memory.set(curr,Word.build(0xA, code, r1, rd, 0));
 							curr++;
 						} else if (ins.equals("call")) {
 							Attribute a1 = Attribute.parse(inss, li);
@@ -187,14 +185,12 @@ public class Assemble {
 
 							Attribute a1 = Attribute.parse(inss, li);
 							if (a1.type == AttType.VALUE) {
-								Word inst = new Word(0xA, 0x4, jcode, r1,
-										a1.val);
-								simulate.memory.set(curr, inst.get());
+								simulate.memory.set(curr,Word.build(0xA, 0x4, jcode, r1,
+										a1.val));
 								curr++;
 							} else if (a1.type == AttType.LABEL) {
 								symbols.put(curr, new Symbol(a1.str, li));
-								Word inst = new Word(0xA, 0x4, jcode, r1, 0);
-								simulate.memory.set(curr, inst.get());
+								simulate.memory.set(curr,Word.build(0xA, 0x4, jcode, r1, 0));
 								curr++;
 							} else {
 								throw new ParseException(li,
@@ -202,23 +198,19 @@ public class Assemble {
 							}
 						} else if (ins.equals("set")) {
 							int bit = parsebit(inss, li);
-							Word inst1 = new Word(0xA, 0x5, 0x1, bit, 0);
-							simulate.memory.set(curr, inst1.get());
+							simulate.memory.set(curr,Word.build(0xA, 0x5, 0x1, bit, 0));
 							curr++;
 						} else if (ins.equals("reset")) {
 							int bit = parsebit(inss, li);
-							Word inst1 = new Word(0xA, 0x5, 0x0, bit, 0);
-							simulate.memory.set(curr, inst1.get());
+							simulate.memory.set(curr,Word.build(0xA, 0x5, 0x0, bit, 0));
 							curr++;
 						} else if (ins.equals("push")) {
 							int r1 = parsereg(inss, li);
-							Word inst1 = new Word(0xA, 0x6, 0x0, r1, 0);
-							simulate.memory.set(curr, inst1.get());
+							simulate.memory.set(curr,Word.build(0xA, 0x6, 0x0, r1, 0));
 							curr++;
 						} else if (ins.equals("pop")) {
 							int r1 = parsereg(inss, li);
-							Word inst1 = new Word(0xA, 0x6, 0x1, r1, 0);
-							simulate.memory.set(curr, inst1.get());
+							simulate.memory.set(curr,Word.build(0xA, 0x6, 0x1, r1, 0));
 							curr++;
 						} else if (ins.equals("rotate")) {
 							Attribute a1 = Attribute.parse(inss, li);
@@ -229,12 +221,10 @@ public class Assemble {
 								throw new ParseException(li,
 										" rotation requires immediate value or register");
 							if (a1.type == AttType.IVALUE) {
-								Word inst1 = new Word(0xB, 0, r1, rd, a1.val & 0x1f);
-								simulate.memory.set(curr, inst1.get());
+								simulate.memory.set(curr,Word.build(0xB, 0, r1, rd, a1.val & 0x1f));
 								curr++;
 							} else  {
-								Word inst1 = new Word(0xE, a1.rcode(), r1, rd, 0);
-								simulate.memory.set(curr, inst1.get());
+								simulate.memory.set(curr,Word.build(0xE, a1.rcode(), r1, rd, 0));
 								curr++;
 							}
 						} else if (ins.equals("load")) {
@@ -246,53 +236,46 @@ public class Assemble {
 								a3 = Attribute.parse(inss, li);
 							if (a1.type == AttType.IVALUE
 									&& a2.type == AttType.REG && a3 == null) {
-								Word inst1 = new Word(0xC, 0x0, 0x0,
-										a2.rcode(), a1.val);
-								simulate.memory.set(curr, inst1.get());
+								simulate.memory.set(curr,Word.build(0xC, 0x0, 0x0,
+										a2.rcode(), a1.val));
 								curr++;
 
 							} else if (a1.type == AttType.ILABEL
 									&& a2.type == AttType.REG && a3 == null) {
 								symbols.put(curr, new Symbol(a1.str, li));
-								Word inst1 = new Word(0xC, 0x0, 0x0,
-										a2.rcode(), 0);
-								simulate.memory.set(curr, inst1.get());
+								simulate.memory.set(curr,Word.build(0xC, 0x0, 0x0,
+										a2.rcode(), 0));
 								curr++;
 							} else if (a1.type == AttType.LABEL
 									&& a2.type == AttType.REG && a3 == null) {
 								symbols.put(curr, new Symbol(a1.str, li));
-								Word inst1 = new Word(instcode, 0x1, 0x0, a2
-										.rcode(), 0);
-								simulate.memory.set(curr, inst1.get());
+								simulate.memory.set(curr,Word.build(instcode, 0x1, 0x0, a2
+										.rcode(), 0));
 								curr++;
 							} else if (a1.type == AttType.VALUE
 									&& a2.type == AttType.REG && a3 == null) {
-								Word inst1 = new Word(instcode, 0x1, 0x0, a2
-										.rcode(), a1.val);
-								simulate.memory.set(curr, inst1.get());
+								simulate.memory.set(curr,Word.build(instcode, 0x1, 0x0, a2
+										.rcode(), a1.val));
 								curr++;
 
 							} else if (a1.type == AttType.REG
 									&& a2.type == AttType.REG && a3 == null) {
-								Word inst1 = new Word(instcode, 0x2,
-										a1.rcode(), a2.rcode(), 0);
-								simulate.memory.set(curr, inst1.get());
+								simulate.memory.set(curr,Word.build(instcode, 0x2,
+										a1.rcode(), a2.rcode(), 0));
 								curr++;
 							} else if (a1.type == AttType.REG
 									&& (a2.type == AttType.IVALUE || a2.type == AttType.ILABEL)
 									&& a3 != null && a3.type == AttType.REG) {
 
 								if (a2.type == AttType.IVALUE) {
-									Word inst1 = new Word(instcode, 0x3, a1
-											.rcode(), a3.rcode(), a2.val);
-									simulate.memory.set(curr, inst1.get());
+									simulate.memory.set(curr,Word.build(instcode, 0x3, a1
+											.rcode(), a3.rcode(), a2.val));
 									curr++;
 
 								} else {
 									symbols.put(curr, new Symbol(a2.str, li));
-									Word inst1 = new Word(instcode, 0x3, a1
-											.rcode(), a3.rcode(), 0);
-									simulate.memory.set(curr, inst1.get());
+									simulate.memory.set(curr,Word.build(instcode, 0x3, a1
+											.rcode(), a3.rcode(), 0));
 									curr++;
 								}
 
@@ -315,40 +298,33 @@ public class Assemble {
 							} else if (a2.type == AttType.LABEL
 									&& a1.type == AttType.REG && a3 == null) {
 								symbols.put(curr, new Symbol(a2.str, li));
-								Word inst1 = new Word(instcode, 0x1,
-										a1.rcode(), 0x0, 0);
-								simulate.memory.set(curr, inst1.get());
+								simulate.memory.set(curr,Word.build(instcode, 0x1,
+										a1.rcode(), 0x0, 0));
 								curr++;
 
 							} else if (a2.type == AttType.VALUE
 									&& a1.type == AttType.REG && a3 == null) {
-								Word inst1 = new Word(instcode, 0x1,
-										a1.rcode(), 0x0, a2.val);
-
-								simulate.memory.set(curr, inst1.get());
+								simulate.memory.set(curr,Word.build(instcode, 0x1,
+										a1.rcode(), 0x0, a2.val));
 								curr++;
 
 							} else if (a1.type == AttType.REG
 									&& a2.type == AttType.REG && a3 == null) {
-								Word inst1 = new Word(instcode, 0x2,
-										a1.rcode(), a2.rcode(), 0);
-								simulate.memory.set(curr, inst1.get());
+								simulate.memory.set(curr,Word.build(instcode, 0x2,
+										a1.rcode(), a2.rcode(), 0));
 								curr++;
 							} else if (a1.type == AttType.REG
 									&& (a2.type == AttType.IVALUE || a2.type == AttType.ILABEL)
 									&& a3 != null && a3.type == AttType.REG) {
 
 								if (a2.type == AttType.IVALUE) {
-									Word inst1 = new Word(instcode, 0x3,
-											a1.rcode(), a3.rcode(),a2.val);
-									simulate.memory.set(curr, inst1.get());
+									simulate.memory.set(curr,Word.build(instcode, 0x3,
+											a1.rcode(), a3.rcode(),a2.val));
 									curr++;
-
 								} else {
 									symbols.put(curr, new Symbol(a2.str, li));
-									Word inst1 = new Word(instcode, 0x3,
-											a1.rcode(), a3.rcode(),0);
-									simulate.memory.set(curr, inst1.get());
+									simulate.memory.set(curr,Word.build(instcode, 0x3,
+											a1.rcode(), a3.rcode(),0));
 									curr++;
 								}
 							} else {
@@ -520,6 +496,8 @@ public class Assemble {
 		}
 		return curr;
 	}
+
+
 
 	private static int parsebit(MyScanner inss, Lineinfo li)
 			throws ParseException {

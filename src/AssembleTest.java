@@ -129,7 +129,7 @@ public class AssembleTest {
 		Simulate sim = new Simulate(false, false,false);
 		Assemble.assemble("0x0100 : " + inst + " R1 R2", sim);
 		sim.r[1].set(v1);
-
+ 
 		sim.r[2].set(0);
 		sim.step();
 		assertEquals(res,sim.r[2].get());
