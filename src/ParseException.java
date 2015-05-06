@@ -35,10 +35,10 @@ public class ParseException extends Exception {
 	}
 	
 	public ParseException(Lineinfo li, String message) {
-		this.line = li.line;
+		this.line = li.line();
 		this.message = message;
-		this.num = li.linenum;
-		this.filename = li.filename;
+		this.num = li.linenum();
+		this.filename = li.filename();
 	}
 	
 	@Override

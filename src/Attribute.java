@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.util.ArrayList;
 
 public class Attribute {
 	AttType type;
@@ -25,113 +26,128 @@ public class Attribute {
 	Integer val;
 
 	Lineinfo li;
+	ArrayList<ParseError> errorlist;
 
-	public Attribute(AttType type, String att, String str, Integer val, Lineinfo li) {
+	public Attribute(AttType type, String att, String str, Integer val,
+			Lineinfo li, ArrayList<ParseError> errorlist) {
 		super();
 		this.type = type;
 		this.att = att;
 		this.str = str;
 		this.val = val;
 		this.li = li;
+		this.errorlist = errorlist;
+	}
+	static Attribute parse(String str, Lineinfo li,
+			ArrayList<ParseError> errorlist) {
+	    Tokenizer tok = new MySimpleTokenizer(str);
+	    return parse(tok,li,errorlist);
 	}
 
-	static Attribute parse(MyScanner scan,  Lineinfo li) throws ParseException {
-		if (scan.hasNext()) {
-			return parse(scan.next(), li);
+	
+	static Attribute parse(Tokenizer tok, Lineinfo li,
+			ArrayList<ParseError> errorlist) {
+
+		if (!tok.hasCurrent())
+			return null;
+
+		if (tok.current().equals("&")) {
+			tok.next();
+			if (tok.hasCurrent() && tok.current() instanceof String) {
+				String lab = (String) tok.current();
+				tok.next();
+				return new Attribute(AttType.MACROLABEL, "&" + lab, lab, 0, li,
+						errorlist);
+			} else {
+				errorlist.add(new ParseError(li, "String label expected"));
+				return null;
+			}
+		} else if (tok.current().equals("#")) {
+			tok.next();
+			if (tok.hasCurrent()) {
+				if (tok.current() instanceof Integer) {
+					Integer w = (Integer) tok.current();
+					tok.next();
+					return new Attribute(AttType.IVALUE, "#" + w, "" + w, w,
+							li, errorlist);
+				} else {
+					String tstr = (String) tok.current();
+					tok.next();
+					if (tstr.startsWith("\"")) {
+						D.p("parse ISTRING : " + tstr);
+						if (tstr.endsWith("\"")) {
+							return new Attribute(AttType.ISTRING, tstr,
+									tstr.substring(1, tstr.length() - 1), 0,
+									li, errorlist);
+						} else {
+							errorlist.add(new ParseError(li,
+									"expecting matching quotes "));
+						}
+					} else if (tstr.startsWith("'")) {
+						D.p("parse IVALUE char : " + tstr);
+						if (tstr.length() < 2)
+							errorlist
+									.add(new ParseError(li,
+											"expecting a character after the single quote (note that ; needs escaping)"));
+						return new Attribute(AttType.IVALUE, tstr, tstr,
+								(int) tstr.charAt(1), li, errorlist);
+					} else {
+						return new Attribute(AttType.ILABEL, tstr, tstr, null,
+								li, errorlist);
+					}
+
+				}
+			} else {
+				errorlist
+						.add(new ParseError(li, "expecting something after #"));
+			}
+
+		} else {
+			if (tok.hasCurrent() && tok.current() instanceof String) {
+				String tstr = (String) tok.current();
+				tok.next();
+				if (tstr.equals("R0") || tstr.equals("R1") || tstr.equals("R2")
+
+				|| tstr.equals("R3") || tstr.equals("R4") || tstr.equals("R5")
+						|| tstr.equals("R6") || tstr.equals("R7")
+						|| tstr.equals("SP") || tstr.equals("SR")
+						|| tstr.equals("PC") || tstr.equals("ONE")
+						|| tstr.equals("ZERO") || tstr.equals("MONE")) {
+					return new Attribute(AttType.REG, tstr, tstr, null, li,
+							errorlist);
+				} else if (tstr.startsWith("\"")) {
+					D.p("parse STRING : " + tstr);
+					if (tstr.endsWith("\"")) {
+						return new Attribute(AttType.STRING, tstr,
+								tstr.substring(1, tstr.length() - 1), 0, li,
+								errorlist);
+					} else {
+						errorlist.add(new ParseError(li,
+								"expecting matching quotes "));
+						return null;
+					}
+				} else {
+					return new Attribute(AttType.LABEL, tstr, tstr, null, li,
+							errorlist);
+				}
+			} else { // Integer
+				int v = (Integer) tok.current();
+				tok.next();
+				return new Attribute(AttType.VALUE, v + "", v + "", (int) v,
+						li, errorlist);
+			}
+
 		}
+
 		return null;
 	}
 
-	static Attribute parse(String str, Lineinfo li) throws ParseException {
-		String tstr = str.trim();
-
-		if (tstr.length() == 0)
-			return null;
-		
-		if (tstr.charAt(0) == '&') {
-			return new Attribute(AttType.MACROLABEL, str, tstr.substring(1), 0, li);
-		} else if (tstr.charAt(0) == '#') {
-			tstr = tstr.substring(1);
-
-			if (tstr.startsWith("0x")) {
-				Long w;
-				try {
-					w = Long.parseLong(tstr.substring(2), 16);
-				} catch (NumberFormatException nf2) {
-					w = null;
-				}
-				return new Attribute(AttType.IVALUE, str, tstr, (int) (w & 0xffffffff), li);
-			} else if (tstr.startsWith("\"")) {
-				D.p("parse ISTRING : " + tstr);
-				if (tstr.endsWith("\"")) {
-					return new Attribute(AttType.ISTRING, str, tstr.substring(1, tstr.length()-1), 0, li);
-				} else {
-					throw new ParseException(li, "expecting matching quotes ");
-				}
-			} else if (tstr.startsWith("'")) {
-				D.p("parse IVALUE char : " + tstr);
-				if (tstr.length() < 2) throw new ParseException(li, "expecting a character after the single quote (note that ; needs escaping)");
-				return new Attribute(AttType.IVALUE, str, tstr, (int) tstr.charAt(1), li);
-			}
-			Integer v;
-			try {
-				v = Integer.parseInt(tstr);
-			} catch (NumberFormatException nf2) {
-				v = null;
-			}
-			if (v != null) {
-				return new Attribute(AttType.IVALUE, str, tstr, v, li);
-			} else {
-				return new Attribute(AttType.ILABEL, str, tstr, null, li);
-			} // check for chars and strings
-		} else if (tstr.equals("R0") || tstr.equals("R1") || tstr.equals("R2")
-				|| tstr.equals("R3") || tstr.equals("R4") || tstr.equals("R5")
-				|| tstr.equals("R6") || tstr.equals("R7") || tstr.equals("SP")
-				|| tstr.equals("SR") || tstr.equals("PC") || tstr.equals("ONE")
-				|| tstr.equals("ZERO") || tstr.equals("MONE")) {
-			return new Attribute(AttType.REG, str, tstr, null, li);
-		} else if (tstr.startsWith("0x")) {
-			Long v;
-			try {
-				//System.out.println("b: " + tstr );
-				v = Long.parseLong(tstr.substring(2), 16);
-				//System.out.println("a: " + v );
-			} catch (NumberFormatException nf2) {
-				return null;
-			}
-			return new Attribute(AttType.VALUE, str, tstr, (int) (v & 0xffffffff), li);
-		} else if (tstr.startsWith("\"")) {
-			D.p("parse STRING : " + tstr);
-			if (tstr.endsWith("\"")) {
-				return new Attribute(AttType.STRING, str, tstr.substring(1, tstr.length()-1), 0, li);
-			} else {
-				throw new ParseException(li, "expecting matching quotes ");
-			}
-		} else {
-			Integer v;
-			try {
-				v = Integer.parseInt(tstr);
-			} catch (NumberFormatException nfe) {
-				v = null;
-			}
-			if (v != null) {
-				return new Attribute(AttType.VALUE, str, tstr, v, li);
-			} else {
-				return new Attribute(AttType.LABEL, str, tstr, null, li);
-			}
-
-			// need to add strings
-
-		}
-
+	public int rcode() {
+		return Attribute.rcode(str, li, errorlist);
 	}
 
-
-	public int rcode()  throws ParseException {
-		return rcode(str,li);
-	}
-
-	static public int rcode(String rs, Lineinfo li)  throws ParseException {
+	static public int rcode(String rs, Lineinfo li,
+			ArrayList<ParseError> errorlist) {
 		if (rs.equals("R0")) {
 			return 0;
 		} else if (rs.equals("R1")) {
@@ -161,6 +177,8 @@ public class Attribute {
 		} else if (rs.equals("MONE")) {
 			return 13;
 		}
-		throw new ParseException(li, rs + " is not a register. Register expected ");
+		errorlist.add(new ParseError(li, rs
+				+ " is not a register. Register expected "));
+		return 0;
 	}
 }

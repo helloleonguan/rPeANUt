@@ -46,9 +46,10 @@ public class Macro {
 	
 	// Get a String suitable for the Assemble.parse() function. This resolves
 	// the macro arguments too
-	public String getText(ArrayList<String> passargs, Lineinfo li) throws ParseException {
+	public String getText(ArrayList<String> passargs, Lineinfo li, ArrayList<ParseError> errorlist) {
 		if (passargs.size() != args.size()) {
-			throw new ParseException(li, "calling macro with wrong number of arguments");
+			
+			errorlist.add(new ParseError(li, "calling macro with wrong number of arguments"));
 		}
 		String text = "";
 		for (int i = 0; i < lines.size(); i++) {

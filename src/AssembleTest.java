@@ -28,34 +28,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 public class AssembleTest {
 
-	public void testComp(String str, int s1, int s2) throws MemFaultException, ParseException {
+	public void testComp(String str, int s1, int s2) throws MemFaultException {
 		Simulate sim = new Simulate(true, false,false);
-		Assemble.assemble(str, sim);
+		sim.reset();
+		Assemble.assemble(str, sim.memory);
 		assertEquals((s1 << 16) | s2 ,sim.memory.get( 0));
 
 		sim = new Simulate(false, false, false);
-		Assemble.assemble(str, sim);
+		sim.reset();
+		Assemble.assemble(str, sim.memory);
 		assertEquals((s1 << 16) | s2 ,sim.memory.get( 0));
 
 
 	}
 
-	public void testCompA(String str, int add, int s1, int s2) throws MemFaultException, ParseException {
+	public void testCompA(String str, int add, int s1, int s2) throws MemFaultException {
 		Simulate sim = new Simulate(true, false,false);
-		Assemble.assemble(str, sim);
+		sim.reset();
+		Assemble.assemble(str, sim.memory);
+		
 		assertEquals((s1 << 16) | s2 ,sim.memory.get( add));
 
 		sim = new Simulate(false, false,false);
-		Assemble.assemble(str, sim);
+		sim.reset();
+		Assemble.assemble(str, sim.memory);
 		assertEquals((s1 << 16) | s2 ,sim.memory.get( add));
 	}
 
-	public void testCompFiles(String filename, String filenameequiv) throws MemFaultException, ParseException, IOException {
+	public void testCompFiles(String filename, String filenameequiv) throws MemFaultException, IOException {
 		Simulate sim = new Simulate(true, false,false);
-		Assemble.assembleFile(filename, sim);
+		sim.reset();
+		Assemble.assembleFile(filename, sim.memory);
 		
 		Simulate simequiv = new Simulate(true, false,false);
-		Assemble.assembleFile(filenameequiv, simequiv);
+		simequiv.reset();
+		Assemble.assembleFile(filenameequiv, simequiv.memory);
 		
 		for (int i = 0; i < Memory.addressSize; i++) {
 			assertEquals(sim.memory.get(i), simequiv.memory.get(i));
@@ -63,7 +70,7 @@ public class AssembleTest {
 	}
 
 	@Test
-	public void testUnitComp() throws MemFaultException, ParseException {
+	public void testUnitComp() throws MemFaultException {
 		testComp("add R1 R2 R3",  0x1123, 0x0000 );
 		testComp("sub R4 R2 SP",  0x2428, 0x0000 );
 		testComp("mult R4 SR SP", 0x3498, 0x0000 );
@@ -76,6 +83,10 @@ public class AssembleTest {
 		testComp("not R1 R5",   0xA115, 0x0000 );
 		testComp("move R1 R5",   0xA215, 0x0000 );
 		testComp("call 0x1234 ",   0xA300, 0x1234 );
+		testCompA("0x0005 :  call 0x0005 ",   0x0005, 0xA300, 0x0005 );
+		
+		testCompA("0x0005 : \n line : call line ",   0x0005, 0xA300, 0x0005 );
+		testCompA("0x1321 : \n line : call line ",   0x1321, 0xA300, 0x1321 );
 		testCompA("0x4321 : \n line : call line ",   0x4321, 0xA300, 0x4321 );
 		testComp("return",   0xA301, 0x0000 );
 		testComp("trap",   0xA302, 0x0000 );
@@ -100,24 +111,25 @@ public class AssembleTest {
 	}
 	
 	@Test
-	public void testUnitInclude() throws MemFaultException, ParseException, IOException {
+	public void testUnitInclude() throws MemFaultException, IOException {
 		testCompFiles("tests/testinclude.rp", "tests/testincludeout.rp");
 	}
 
 	@Test
-	public void testUnitMacro1() throws MemFaultException, ParseException, IOException {
+	public void testUnitMacro1() throws MemFaultException, IOException {
 		testCompFiles("tests/macro.rp", "tests/macroout.rp");
 	}
 	
 	@Test
-	public void testUnitMacro2() throws MemFaultException, ParseException, IOException {
+	public void testUnitMacro2() throws MemFaultException, IOException {
 		testCompFiles("tests/macrobug.rp", "tests/macrobugout.rp");
 	}
 	
 	
-	void calctest(String inst, int v1, int v2, int res) throws ParseException {
+	void calctest(String inst, int v1, int v2, int res) {
 		Simulate sim = new Simulate(false, false,false);
-		Assemble.assemble("0x0100 : " + inst + " R1 R2 R3", sim);
+		sim.reset();
+		Assemble.assemble("0x0100 : " + inst + " R1 R2 R3", sim.memory);
 		sim.r[1].set(v1);
 		sim.r[2].set(v2);
 		sim.r[3].set(0);
@@ -125,9 +137,10 @@ public class AssembleTest {
 		assertEquals(res,sim.r[3].get());
 	}
 
-	void calctest1(String inst, int v1, int res) throws ParseException {
+	void calctest1(String inst, int v1, int res)  {
 		Simulate sim = new Simulate(false, false,false);
-		Assemble.assemble("0x0100 : " + inst + " R1 R2", sim);
+		sim.reset();
+		Assemble.assemble("0x0100 : " + inst + " R1 R2", sim.memory);
 		sim.r[1].set(v1);
  
 		sim.r[2].set(0);
@@ -136,7 +149,7 @@ public class AssembleTest {
 	}
 
 	@Test
-	public void testUnitExecution() throws ParseException {
+	public void testUnitExecution()  {
 		calctest("add",3,7,10);
 		calctest("sub",3,7,-4  );
 		calctest("mult",3,7,21);
@@ -150,7 +163,26 @@ public class AssembleTest {
 		calctest1("neg",-4,4);
 		calctest1("not",0x00005f01,0xffffa0fe);
 		calctest1("move",0xf32b,0xf32b);
-
+	}
+	
+	@Test
+	public void testTokenizer() {
+		testtok("0x100 : load #3 R1", new Object[] {new Integer(256), ":", "load", "#", new Integer(3), "R1"});
+		testtok("  label : ; comment", new Object[] {"label", ":"});
+		testtok("load    #'H'   R2  ",  new Object[] {"load", "#", "'H'", "R2"});
 
 	}
+
+	private void testtok(String string, Object[] objects) {
+		Tokenizer tok = new MySimpleTokenizer(string);
+		int pos = 0;
+		while (tok.hasCurrent() && pos < objects.length) {
+			assertEquals("mismatch token " + pos,tok.current(),objects[pos]);
+			tok.next();
+			pos++;
+		}
+		assertEquals("still more tokens",tok.hasCurrent(), false);
+		assertEquals("not enough tokens", pos,objects.length);
+	}
+	
 }

@@ -1,13 +1,39 @@
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.LayoutManager;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.prefs.Preferences;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.JSplitPane;
+import javax.swing.KeyStroke;
 
 /*
  rPeanut - is a simple simulator of the rPeANUt computer.
@@ -29,7 +55,7 @@ import java.util.prefs.Preferences;
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
+/* 
  * Some ideas for improvement from Nathan Rickerby
  * Okay, here are some of the things that came to mind as I was playing
  with rPeANUt.
@@ -95,8 +121,9 @@ public class Peanut implements ActionListener, LayoutManager,
 	static final String version = "2.5";
 
 	JFrame jframe;
-	
-	JCheckBoxMenuItem echoInputItem, profileItem;
+
+	//JCheckBoxMenuItem echoInputItem, profileItem;
+	JCheckBoxMenuItem autohighlighItem;
 	JMenuItem pipeMenuItem;
 	JMenuItem cacheMenuItem;
 
@@ -131,6 +158,8 @@ public class Peanut implements ActionListener, LayoutManager,
 	private File currentFileName = null;
 	private static final String PIPEFILE = "pipe";
 
+	private static final String CHANGEAUTOHIGHLIGHT = "changeautohighlight";
+
 	public Peanut() {
 		lastpoke = 0;
 		jframe = new JFrame("rPeANUt - " + version);
@@ -141,56 +170,61 @@ public class Peanut implements ActionListener, LayoutManager,
 				exit();
 			}
 		});
-		//jframe.setExtendedState(jframe.getExtendedState()
-		//		| JFrame.MAXIMIZED_BOTH);
+		// jframe.setExtendedState(jframe.getExtendedState()
+		// | JFrame.MAXIMIZED_BOTH);
 
 		prefs = Preferences.userNodeForPackage(Peanut.class);
-		
+
 		JMenuBar bar;
 		JMenu fileMenu, editMenu, codeMenu;
-		
+
 		bar = new JMenuBar();
-		
-		fileMenu = new JMenu("File");	
-		createMenuItem(fileMenu, "New",NEW , KeyStroke.getKeyStroke(KeyEvent.VK_N,
-				ActionEvent.CTRL_MASK));
-		createMenuItem(fileMenu,"Load" , LOAD, KeyStroke.getKeyStroke(KeyEvent.VK_L,
-				ActionEvent.CTRL_MASK));
-		createMenuItem(fileMenu, "Load Last",LOADLAST , KeyStroke.getKeyStroke(KeyEvent.VK_O,
-				ActionEvent.CTRL_MASK));
-		createMenuItem(fileMenu,"Save" , SAVE, KeyStroke.getKeyStroke(KeyEvent.VK_S,
-				ActionEvent.CTRL_MASK));
-		createMenuItem(fileMenu, "Save As", SAVEAS, KeyStroke.getKeyStroke(KeyEvent.VK_S,
-				InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
-		createMenuItem(fileMenu,"Exit" ,EXIT , KeyStroke.getKeyStroke(KeyEvent.VK_Q,
-				ActionEvent.CTRL_MASK));
-		
+
+		fileMenu = new JMenu("File");
+		createMenuItem(fileMenu, "New", NEW,
+				KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+		createMenuItem(fileMenu, "Load", LOAD,
+				KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.CTRL_MASK));
+		createMenuItem(fileMenu, "Load Last", LOADLAST,
+				KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
+		createMenuItem(fileMenu, "Save", SAVE,
+				KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+		createMenuItem(fileMenu, "Save As", SAVEAS, KeyStroke.getKeyStroke(
+				KeyEvent.VK_S, InputEvent.SHIFT_DOWN_MASK
+						| InputEvent.CTRL_DOWN_MASK));
+		createMenuItem(fileMenu, "Exit", EXIT,
+				KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
+
 		editMenu = new JMenu("Edit");
-		createMenuItem(editMenu, "Undo", UNDO,KeyStroke.getKeyStroke(KeyEvent.VK_Z,
-				ActionEvent.CTRL_MASK) );
-		createMenuItem(editMenu,"Change Font Size" ,FONTSIZE , null);
-		
+		createMenuItem(editMenu, "Undo", UNDO,
+				KeyStroke.getKeyStroke(KeyEvent.VK_Z, ActionEvent.CTRL_MASK));
+		createMenuItem(editMenu, "Change Font Size", FONTSIZE, null);
+
 		codeMenu = new JMenu("Code");
-		createMenuItem(codeMenu,"Assemble" , ASSEMBLE,KeyStroke.getKeyStroke(KeyEvent.VK_B,
-				InputEvent.CTRL_DOWN_MASK) );
-		createMenuItem(codeMenu, "Run", RUN, KeyStroke.getKeyStroke(KeyEvent.VK_R,
-				InputEvent.CTRL_DOWN_MASK) );
-		createMenuItem(codeMenu,"Step" , STEP, KeyStroke.getKeyStroke(KeyEvent.VK_T,
-				InputEvent.CTRL_DOWN_MASK));
-		createMenuItem(codeMenu, "Stop", STOP, KeyStroke.getKeyStroke(KeyEvent.VK_P,
-				InputEvent.CTRL_DOWN_MASK));
+		createMenuItem(codeMenu, "Assemble", ASSEMBLE, KeyStroke.getKeyStroke(
+				KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK));
+		createMenuItem(codeMenu, "Run", RUN, KeyStroke.getKeyStroke(
+				KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK));
+		createMenuItem(codeMenu, "Step", STEP, KeyStroke.getKeyStroke(
+				KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK));
+		createMenuItem(codeMenu, "Stop", STOP, KeyStroke.getKeyStroke(
+				KeyEvent.VK_P, InputEvent.CTRL_DOWN_MASK));
 
 		codeMenu.add(new JSeparator());
-		
-		createCheckBox(codeMenu,"Echo terminal input",CHANGEECHO, prefs.getBoolean("echo", false));
-		createCheckBox(codeMenu,"Profile", CHANGEPROFILE, prefs.getBoolean("profile", false));
-		
-		createMenuItem(codeMenu,"Input file to terminal" , PIPEFILE, null);
+
+		createCheckBox(codeMenu, "Echo terminal input", CHANGEECHO,
+				prefs.getBoolean("echo", false));
+		createCheckBox(codeMenu, "Profile", CHANGEPROFILE,
+				prefs.getBoolean("profile", false));
+
+		autohighlighItem = createCheckBox(codeMenu, "Auto Highlight Errors", CHANGEAUTOHIGHLIGHT,
+				prefs.getBoolean("autohighlight", false));
 
 		
-		createMenuItem(codeMenu,"Show cache simulator" , SHOWCACHE, null);
+		createMenuItem(codeMenu, "Input file to terminal", PIPEFILE, null);
 
-		
+		createMenuItem(codeMenu, "Show cache simulator", SHOWCACHE, null);
+
 		bar.add(fileMenu);
 		bar.add(editMenu);
 		bar.add(codeMenu);
@@ -230,7 +264,7 @@ public class Peanut implements ActionListener, LayoutManager,
 		jframe.addWindowFocusListener(this);
 
 		mainpanel.add(split);
-
+		editcode.setAutoHighlight(autohighlighItem.isSelected());
 		jframe.getContentPane().add(mainpanel);
 
 		jfcs = new JFileChooser(".");
@@ -239,22 +273,23 @@ public class Peanut implements ActionListener, LayoutManager,
 		jframe.setVisible(true);
 	}
 
-
-	
-	private void createCheckBox(JMenu menu,  String name, String command, boolean state) {
+	private JCheckBoxMenuItem createCheckBox(JMenu menu, String name, String command,
+			boolean state) {
 		JCheckBoxMenuItem item = new JCheckBoxMenuItem(name);
 		item.setState(state);
 		item.setActionCommand(command);
 		item.addActionListener(this);
 		menu.add(item);
+		return item;
 	}
 
-	
-	private void createMenuItem(JMenu menu, String name, String command, KeyStroke ks) {
+	private void createMenuItem(JMenu menu, String name, String command,
+			KeyStroke ks) {
 		JMenuItem mi = new JMenuItem(name);
 		mi.setActionCommand(command);
 		mi.addActionListener(this);
-		if (ks!=null) mi.setAccelerator(ks);
+		if (ks != null)
+			mi.setAccelerator(ks);
 		menu.add(mi);
 	}
 
@@ -291,6 +326,9 @@ public class Peanut implements ActionListener, LayoutManager,
 		} else if (ae.getActionCommand().equals(CHANGEPROFILE)) {
 			simulate.toggleProfile();
 			prefs.putBoolean("profile", simulate.getProfile());
+		} else if (ae.getActionCommand().equals(CHANGEAUTOHIGHLIGHT)) {
+			editcode.setAutoHighlight(autohighlighItem.isSelected());
+			prefs.putBoolean("autohighlight", editcode.getAutoHighLight());
 		} else if (ae.getActionCommand().equals(SAVEAS)) {
 			saveas();
 		} else if (ae.getActionCommand().equals(PIPEFILE)) {
@@ -371,16 +409,19 @@ public class Peanut implements ActionListener, LayoutManager,
 
 	private void assemble() {
 		String text = editcode.text();
-		try {
-			if (currentFileName != null) {
-				Assemble.assemble(text, simulate, currentFileName.getName());
-			} else {
-				Assemble.assemble(text, simulate, null);
-			}
-		} catch (ParseException e) {
-
-			e.printStackTrace();
+		simulate.reset();
+		ParseErrors errorlist =  Assemble.assemblewithfile(text, simulate.memory,
+				currentFileName != null ? currentFileName.getName() : null);
+		editcode.highlighterrors(errorlist);
+		if (errorlist.size() > 0) {
+		    simulate.reset();	
+			String err = errorlist.show(10);
+			//editcode.highlighterrors(errorlist);
+		    JOptionPane.showMessageDialog(null, err);
+		} else {
+			simulate.update();
 		}
+
 	}
 
 	private void exit() {
@@ -525,43 +566,47 @@ public class Peanut implements ActionListener, LayoutManager,
 					Simulate simulate = new Simulate(true, false, false);
 
 					if (check) {
-						try {
-							Assemble.assemble(text, simulate);
-						} catch (ParseException e) {
-							System.out.println("Problem : " + e);
+                        simulate.reset();
+						ArrayList<ParseError> errorlist = Assemble.assemble(
+								text, simulate.memory);
+						if (errorlist.size() > 0) {
+							System.out.println("Problem : " + errorlist);
 							System.exit(1);
 						}
 						System.out.println("okay");
 						System.exit(0);
 					} else {
-						Assemble.assemble(text, simulate);
-						if (objdump) {
-							simulate.memory.objdump(System.out);
-						} else {
+						simulate.reset();
+						ArrayList<ParseError> errorlist = Assemble.assemble(
+								text, simulate.memory);
+						if (errorlist.size() > 0) {
+							if (objdump) {
+								simulate.memory.objdump(System.out);
+							} else {
 
-							if (screen) {
-								JFScreen jscreen = new JFScreen(simulate);
-								Thread t = new Thread(jscreen);
-								t.start();
+								if (screen) {
+									JFScreen jscreen = new JFScreen(simulate);
+									Thread t = new Thread(jscreen);
+									t.start();
+								}
+								while (!simulate.halt) {
+									simulate.step();
+								}
+								if (dumpframebuffer) {
+									simulate.screen.dump(System.out);
+								}
+								if (countsteps) {
+									System.out.println("\nCount : "
+											+ simulate.count);
+								}
 							}
-							while (!simulate.halt) {
-								simulate.step();
-							}
-							if (dumpframebuffer) {
-								simulate.screen.dump(System.out);
-							}
-							if (countsteps) {
-								System.out.println("\nCount : "
-										+ simulate.count);
-							}
+						} else {
+							System.err.println(errorlist);
+							System.exit(1);
 						}
 						System.exit(0);
 					}
-
 				}
-			} catch (ParseException e) {
-				System.out.println("Problem : " + e);
-				System.exit(1);
 			} catch (ArgsException ae) {
 				System.err.println(ae);
 				System.exit(1);
@@ -587,9 +632,13 @@ public class Peanut implements ActionListener, LayoutManager,
 				+ "other Java implementation would generally also work). Once you have the JRE going\n"
 				+ "rPeANUt should run in Windows, Mac, or Linux without too much trouble.\n\n"
 				+ "To run the simulator with the GUI simply down load the jar and execute:\n"
-				+ "    java -jar rPeANUt" + version + ".jar\n\n"
+				+ "    java -jar rPeANUt"
+				+ version
+				+ ".jar\n\n"
 				+ "To run the simulator from the command-line just execute:\n"
-				+ "    java -jar rPeANUt" + version + ".jar <code.s>\n\n"
+				+ "    java -jar rPeANUt"
+				+ version
+				+ ".jar <code.s>\n\n"
 				+ "rPeANUt has the following command line options:\n"
 				+ "    -dump : this does a dump of the frame buffer once the computer halts.\n"
 				+ "    -count : this produces a count of the instructions executed once the program halts.\n"
