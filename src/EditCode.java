@@ -173,7 +173,7 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 				// snap(de);
 				// ln.setText(getText());
 				// System.out.println("C");
-				System.out.println("removeUpdate");
+				//System.out.println("removeUpdate");
 				textChangedSinceHighlight = true;
 			}
 		});
@@ -355,7 +355,7 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 		
 		if (autohighlight && textChangedSinceHighlight) {
 			
-		    errorlist = Assemble.assemble(text.getText(), nullMemory);
+		    errorlist = Assemble.assemble(this, nullMemory);
 		    this.repaint(); 
 		    textChangedSinceHighlight = false;
 		}
@@ -363,6 +363,7 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 
 	public void setAutoHighlight(boolean b) {
 		autohighlight = b;
+		Assemble.assemble(this, nullMemory);
 		this.repaint();
 	}
 

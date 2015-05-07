@@ -96,14 +96,19 @@ public class Word extends JTextField implements KeyListener {
 			text = text.substring(0, 10);
 			this.setText(text);
 		}
-		ArrayList<ParseError> errorlist = new ArrayList<ParseError>();
-		Attribute att = Attribute.parse(text, new Lineinfo(text, 1, "<stdin>"),
+		MySimpleTokenizer tok = new MySimpleTokenizer(text);
+		if (tok.hasCurrent() && tok.current() instanceof Integer) {
+			value = ((Integer) tok.current()).intValue();
+		}
+		
+	/*	ArrayList<ParseError> errorlist = new ArrayList<ParseError>();
+		Attribute att = Ass.parse(text, new Lineinfo(text, 1, "<stdin>"),
 				errorlist);
 		if (errorlist.size() == 0 && att != null && att.type == AttType.VALUE
 				&& att.val != null) {
 			value = att.val;
 			// System.out.println("value : " + value);
-		}
+		}*/
 
 	}
 

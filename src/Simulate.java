@@ -563,22 +563,22 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 	}
 
 	private int getreg1(int instruction) {
-		return getreg((instruction >> 24) & 0xf);
+		return getreg((instruction >> 24) & 0xf, instruction);
 	}
 
 	private int getreg2(int instruction) {
-		return getreg((instruction >> 20) & 0xf);
+		return getreg((instruction >> 20) & 0xf, instruction);
 	}
 
 	private int getreg3(int instruction) {
-		return getreg((instruction >> 16) & 0xf);
+		return getreg((instruction >> 16) & 0xf, instruction);
 	}
 
 	private void setreg3(int instruction, int value) {
 		setreg((instruction >> 16) & 0xf, value);
 	}
 
-	private int getreg(int regindex) {
+	private int getreg(int regindex, int instruction) {
 		if (regindex >= 0 && regindex < 8) {
 			return r[regindex].get();
 		} else if (regindex == 8) {
@@ -593,6 +593,8 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 			return 0;
 		} else if (regindex == 13) {
 			return -1;
+		} else if (regindex == 14) {
+			return extend(instruction & 0xffff);
 		} else {
 			return 0; // we should really cause a trap!
 		}

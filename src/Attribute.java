@@ -38,13 +38,13 @@ public class Attribute {
 		this.li = li;
 		this.errorlist = errorlist;
 	}
-	static Attribute parse(String str, Lineinfo li,
+/*	static Attribute parse(String str, Lineinfo li,
 			ArrayList<ParseError> errorlist) {
 	    Tokenizer tok = new MySimpleTokenizer(str);
 	    return parse(tok,li,errorlist);
 	}
-
-	
+*/
+/*
 	static Attribute parse(Tokenizer tok, Lineinfo li,
 			ArrayList<ParseError> errorlist) {
 
@@ -141,7 +141,7 @@ public class Attribute {
 
 		return null;
 	}
-
+*/
 	public int rcode() {
 		return Attribute.rcode(str, li, errorlist);
 	}

@@ -77,9 +77,16 @@ public class AssembleTest {
 		testComp("div R4 R2 R0",  0x4420, 0x0000 );
 		testComp("mod R4 R2 R7",  0x5427, 0x0000 );
 		testComp("and R4 R2 R1",  0x6421, 0x0000 );
+		testComp("add R1 #0x0F R3",  0x11e3, 0x000F );
+		testComp("sub #-1 R2 SP",  0x2e28, 0xFFFF );
+		testComp("mult R4 #3 SP", 0x34e8, 0x0003 );
+		testComp("div R4 #5 R0",  0x44e0, 0x0005 );
+		testComp("mod #-1 R2 R7",  0x5e27, 0xFFFF );
+		testComp("and #0 R2 R1",  0x6e21, 0x0000 );
 		testComp("or R1 R3 R5",   0x7135, 0x0000 );
 		testComp("xor R1 R3 R5",   0x08135, 0x0000 );
 		testComp("neg R1 R5",   0xA015, 0x0000 );
+		testComp("neg #1 R5",   0xA0e5, 0x0001 );
 		testComp("not R1 R5",   0xA115, 0x0000 );
 		testComp("move R1 R5",   0xA215, 0x0000 );
 		testComp("call 0x1234 ",   0xA300, 0x1234 );
@@ -98,7 +105,8 @@ public class AssembleTest {
 		testComp("set IM",   0xA511, 0x0000 );
 		testComp("push R5",   0xA605, 0x0000 );
 		testComp("pop R5",   0xA615, 0x0000 );
-		testComp("rotate #3 R1 R2",   0xB012, 0x0003 );
+		testComp("rotate #3 R1 R2",   0xEE12, 0x0003 );
+		testComp("rotate R7  #-1 R2",   0xE7E2, 0xFFFF );
 		testComp("rotate R5 R1 R2",   0xE512, 0x0000 );
 		testComp("load #0xABCD R5",   0xC005, 0xABCD );
 		testComp("load 0xABCD R5",   0xC105, 0xABCD );

@@ -10,10 +10,13 @@ public class MySimpleTokenizer extends Tokenizer {
 	private String text;
 	private int pos;
 	private Object current;
+	private int currentstart;
+	private int currentend;
 
 	static final char whitespace[] = { ' ', '\t' };
 	static final char symbol[] = { ':', '#', '&', '\n' };
-	static final char hexdig[] = { 'a',  'b', 'c', 'd', 'e', 'f','A',  'B', 'C', 'D', 'E', 'F'};
+	static final char hexdig[] = { 'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C',
+			'D', 'E', 'F' };
 
 	public MySimpleTokenizer(String text) {
 		this.text = text;
@@ -31,14 +34,15 @@ public class MySimpleTokenizer extends Tokenizer {
 
 	public void next() {
 		consumewhite();
-		if (pos == text.length()) {
+		currentstart = pos;
+		if (pos >= text.length()) {
 			current = null;
 		} else if (text.charAt(pos) == ';') { // everything after this is a
 												// comment
 			while (pos < text.length() && text.charAt(pos) != '\n')
 				pos++;
 			if (pos == text.length()) {
-			   current = null;
+				current = null;
 			} else {
 				pos++;
 				current = "\n";
@@ -52,33 +56,36 @@ public class MySimpleTokenizer extends Tokenizer {
 			while (pos < text.length() && (text.charAt(pos) != '\"'))
 				pos++;
 			pos++;
-			current = text.substring(start, pos);
+			current = text.substring(start, Math.min(pos, text.length()-1));
 		} else if (text.charAt(pos) == '\'') {
 			int start = pos;
 			pos++;
 			while (pos < text.length() && (text.charAt(pos) != '\''))
 				pos++;
-			if (pos<text.length()) pos++;
+			if (pos < text.length())
+				pos++;
 			current = text.substring(start, pos);
 		} else if (Character.isDigit(text.charAt(pos))) {
 			int start = pos;
-			if (pos+1<text.length() && text.charAt(pos+1) == 'x') {
-				pos +=2;
+			if (pos + 1 < text.length() && text.charAt(pos + 1) == 'x') {
+				pos += 2;
 				start = pos;
-				while (pos < text.length() && (Character.isDigit(text.charAt(pos)) ||
-						isin(text.charAt(pos),hexdig)))
+				while (pos < text.length()
+						&& (Character.isDigit(text.charAt(pos)) || isin(
+								text.charAt(pos), hexdig)))
 					pos++;
 				Long w;
 				try {
-					w = Long.parseLong(text.substring(start,pos), 16);
+					w = Long.parseLong(text.substring(start, pos), 16);
 				} catch (NumberFormatException nf2) {
 					w = null;
 				}
 				current = (Integer) (int) (w & 0xffffffff);
 			} else {
-			while (pos < text.length() && Character.isDigit(text.charAt(pos)))
-				pos++;
-			current = Integer.parseInt(text.substring(start, pos));
+				while (pos < text.length()
+						&& Character.isDigit(text.charAt(pos)))
+					pos++;
+				current = Integer.parseInt(text.substring(start, pos));
 			}
 		} else if (text.charAt(pos) == '-') {
 			int start = pos;
@@ -93,6 +100,7 @@ public class MySimpleTokenizer extends Tokenizer {
 				pos++;
 			current = text.substring(start, pos);
 		}
+		currentend = pos;
 	}
 
 	private void consumewhite() {
@@ -106,5 +114,40 @@ public class MySimpleTokenizer extends Tokenizer {
 				return true;
 		}
 		return false;
+	}
+
+	// This consumes and return all the characters from the current position to
+	// the
+	// end of the line moving the tokenizer onto the next line
+	@Override
+	public String nextLine() {
+		int spos = pos;
+		while (pos < text.length() && !(text.charAt(pos) == '\n'))
+			pos++;
+		int epos = pos;
+		next();
+		return text.substring(spos, epos);
+	}
+
+	@Override
+	public String nextLinePeek() {
+		int spos = pos;
+		while (pos < text.length() && !(text.charAt(pos) == '\n'))
+			pos++;
+		int epos = pos;
+		pos = spos;
+		return text.substring(spos, epos);
+	}
+
+	@Override
+	public int currentStart() {
+		
+		return currentstart;
+	}
+
+	@Override
+	public int currentEnd() {
+		
+		return currentend;
 	}
 }

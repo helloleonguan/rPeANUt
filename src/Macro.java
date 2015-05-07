@@ -95,4 +95,8 @@ public class Macro {
         }
 		return -1;
 	}
+	
+	public int argcount() {
+		return args.size();
+	}
 }

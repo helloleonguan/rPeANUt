@@ -19,4 +19,13 @@ public abstract class Tokenizer {
 
 	abstract void next();
 
+	abstract public String nextLine();
+
+	abstract public String nextLinePeek();
+	
+	abstract public int currentStart();
+	abstract public int currentEnd();
+	
+	
+
 }
