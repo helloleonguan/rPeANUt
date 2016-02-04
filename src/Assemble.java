@@ -43,7 +43,7 @@ public class Assemble {
 	ParseErrors errorlist;
 	StyledDocument doc;
 	SimpleAttributeSet saLabel, saComment, saRegister, saLiteral,
-			saInstruction;
+			saInstruction, saMacro;
 
 	private Assemble(Memory memory) {
 
@@ -57,21 +57,23 @@ public class Assemble {
 		this.callstack = new ArrayList<Lineinfo>();
 		this.errorlist = new ParseErrors();
 
-		saLabel = new SimpleAttributeSet();
-		saLabel.addAttribute(StyleConstants.Foreground,
-				new Color(Color.blue.getRGB()).darker());
-		saRegister = new SimpleAttributeSet();
-		saRegister.addAttribute(StyleConstants.Foreground, new Color(
-				Color.green.getRGB()).darker());
-		saComment = new SimpleAttributeSet();
-		saComment.addAttribute(StyleConstants.Foreground,
-				new Color(Color.pink.getRGB()).darker().darker());
-		saLiteral = new SimpleAttributeSet();
-		saLiteral.addAttribute(StyleConstants.Foreground,
-				new Color(Color.red.getRGB()).darker());
-		saInstruction = new SimpleAttributeSet();
-		saInstruction.addAttribute(StyleConstants.Foreground, Color.black);
+		saLabel = makeAttributeFG(Color.blue);
+		saRegister = makeAttributeFG(Color.green);
+		saComment = makeAttributeFG(Color.pink);
+		saLiteral = makeAttributeFG(Color.red);
+		saInstruction = makeAttributeFG(Color.black);
+		saMacro = makeAttributeFG(Color.black);
 
+	}
+
+	static SimpleAttributeSet makeAttributeFG(Color col) {
+		SimpleAttributeSet res = new SimpleAttributeSet();
+		res.addAttribute(StyleConstants.Foreground, col);
+		return res;
+	}
+
+	static Color darker(Color col) {
+		return new Color(col.getRGB()).darker();
 	}
 
 	public static void assembleFile(String filename, Memory memory)
@@ -196,7 +198,8 @@ public class Assemble {
 							String ins = (String) firsttoken;
 							Integer code;
 							if ((code = code(ins)) != null) {
-								// add, sub, mult, div, mod, and, or, xor, rotate
+								// add, sub, mult, div, mod, and, or, xor,
+								// rotate
 								/*
 								 * int r1 = parsereg(tok, li); int r2 =
 								 * parsereg(tok, li); int rd = parsereg(tok,
@@ -348,7 +351,7 @@ public class Assemble {
 								} else {
 									parseError(li, " pop requires a register");
 								}
-							
+
 								/*
 								 * if (a1.type != AttType.IVALUE && a1.type !=
 								 * AttType.REG)
@@ -503,7 +506,10 @@ public class Assemble {
 											String ftext = new String(fdata, 0,
 													len);
 											callstack.add(li);
+											StyledDocument ordoc = doc;
+											doc = null;
 											assemble(ftext, a1.str);
+											doc = ordoc;
 											callstack
 													.remove(callstack.size() - 1);
 											fis.close();
@@ -530,6 +536,9 @@ public class Assemble {
 							} else if (ins.equals("mend")) {
 								parseError(li, "MEND without MACRO");
 							} else if (ins.toLowerCase().equals("macro")) {
+								StyledDocument ordoc = doc;
+								doc = null;
+								int macpspos = tok.currentStart();
 								if (!tok.hasCurrent())
 									parseError(li, "expected MEND");
 								aline = tok.nextLine();
@@ -577,11 +586,18 @@ public class Assemble {
 									}
 									if (!ended)
 										parseError(li, "expected MEND");
+									if (ordoc != null)
+										ordoc.setCharacterAttributes(macpspos,
+												tok.currentEnd() - macpspos,
+												saMacro, true);
 									macros.put(mname, mac);
 									D.p(macros.keySet().toString());
 								}
+								doc = ordoc;
 							} else if (macros.containsKey(ins)) {
 								D.p("parsing macro...");
+								StyledDocument ordoc = doc;
+								doc = null;
 								ArrayList<String> passargs = new ArrayList<String>();
 								int acout = 0;
 								Macro mac = macros.get(ins);
@@ -599,6 +615,7 @@ public class Assemble {
 								assemble(mactext, "macro:" + ins);
 								callstack.remove(callstack.size() - 1);
 								D.p("finished parsing macro");
+								doc = ordoc;
 							} else if (ins.equals("\n")) {
 								// we don't need to do anything
 							} else {
@@ -630,8 +647,12 @@ public class Assemble {
 
 	private Attribute parseAtt(String str, Lineinfo li,
 			ArrayList<ParseError> errorlist) {
+		StyledDocument ordoc = doc;
+		doc = null;
 		Tokenizer tok = new MySimpleTokenizer(str);
-		return parseAtt(tok, li, errorlist);
+		Attribute res = parseAtt(tok, li, errorlist);
+		doc = ordoc;
+		return res;
 	}
 
 	private Attribute parseAtt(Tokenizer tok, Lineinfo li,
