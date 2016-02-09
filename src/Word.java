@@ -28,7 +28,7 @@ public class Word extends JTextField implements KeyListener {
 	protected int value;
 	static Font wordfont = new Font(Font.MONOSPACED, Font.PLAIN, 14);
 	static String str32 = "0x00000000";
-
+	
 	public Word() {
 		this.addKeyListener(this);
 		value = 0;
@@ -70,9 +70,25 @@ public class Word extends JTextField implements KeyListener {
 	}
 
 	
+	public String showDec() {
+		return String.format("%d", value);
+	}
+	
+	public String showAscii() {
+		return String.format("%c%c%c%c", viewAscii((value>>24) & 0xFF),viewAscii((value>>16) & 0xFF),viewAscii((value>>8) & 0xFF),viewAscii((value>>0) & 0xFF));
+	}
+	
+	
+	private char viewAscii(int i) {
+		if (i >= 32 && i <= 126) return (char) i;
+		return '.';
+	}
+
 	public String toString() {
-		return String.format("0x%04x%04x", 0xffff & (value >> 16),
-				0xffff & value);
+		
+			return String.format("0x%04x%04x", 0xffff & (value >> 16),
+					0xffff & value);
+		
 	}
 
 	void set(int v) {
@@ -84,6 +100,7 @@ public class Word extends JTextField implements KeyListener {
 		return value;
 	}
 
+	
 	@Override
 	public void keyPressed(KeyEvent arg0) {
 	}

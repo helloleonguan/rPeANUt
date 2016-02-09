@@ -51,20 +51,41 @@ public class MySimpleTokenizer extends Tokenizer {
 			current = "" + text.charAt(pos);
 			pos++;
 		} else if (text.charAt(pos) == '\"') {
+			String res = "\"";
 			int start = pos;
 			pos++;
-			while (pos < text.length() && (text.charAt(pos) != '\"'))
+			boolean escape = false;
+			while (pos < text.length() && (escape || text.charAt(pos) != '\"')) {
+				if (escape) {
+					res += convertescape(text.charAt(pos));
+					escape = false;
+				} else {
+					if (text.charAt(pos) == '\\') {
+						escape = true;
+					}  else {
+					    res += text.charAt(pos);
+					}
+				}
 				pos++;
+			}
+			if (pos < text.length() &&  text.charAt(pos) == '\"') res += "\"";
 			pos++;
-			current = text.substring(start, Math.min(pos, text.length()-1));
+			current = res;
 		} else if (text.charAt(pos) == '\'') {
-			int start = pos;
-			pos++;
-			while (pos < text.length() && (text.charAt(pos) != '\''))
+			
+			
+			
+			if ((pos+3) < text.length() && (text.charAt(pos+1) == '\\') &&  (text.charAt(pos+3) == '\'') ) {
+				
+				current = "\'"  + convertescape(text.charAt(pos+2))  + "\'";
+				pos +=4;
+			} else if (((pos+2) < text.length()) && (text.charAt(pos+2) == '\'')) {
+				current = "\'"  + text.charAt(pos+1)  + "\'";
+				pos +=3;
+			} else {
+				current = "\'problem";
 				pos++;
-			if (pos < text.length())
-				pos++;
-			current = text.substring(start, pos);
+			}
 		} else if (Character.isDigit(text.charAt(pos))) {
 			int start = pos;
 			if (pos + 1 < text.length() && text.charAt(pos + 1) == 'x') {
@@ -101,6 +122,19 @@ public class MySimpleTokenizer extends Tokenizer {
 			current = text.substring(start, pos);
 		}
 		currentend = pos;
+	}
+
+	static private String convertescape(char c) {
+		if (c == 'n') {
+			return "\n";
+		} else if (c == '0') {
+			return "\0";
+		} else if (c == 't') {
+			return "\t";
+		} else {
+			return "" + c;
+		}
+
 	}
 
 	private void consumewhite() {
@@ -141,13 +175,13 @@ public class MySimpleTokenizer extends Tokenizer {
 
 	@Override
 	public int currentStart() {
-		
+
 		return currentstart;
 	}
 
 	@Override
 	public int currentEnd() {
-		
+
 		return currentend;
 	}
 }

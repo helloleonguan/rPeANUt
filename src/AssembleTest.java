@@ -178,6 +178,8 @@ public class AssembleTest {
 		testtok("0x100 : load #3 R1", new Object[] {new Integer(256), ":", "load", "#", new Integer(3), "R1"});
 		testtok("  label : ; comment", new Object[] {"label", ":"});
 		testtok("load    #'H'   R2  ",  new Object[] {"load", "#", "'H'", "R2"});
+		testtok("load    #'\n'   R2  ",  new Object[] {"load", "#", "'\n'", "R2"});
+		testtok("block    #\"hello\\n\"   ",  new Object[] {"block", "#", "\"hello\n\""});
 
 	}
 
