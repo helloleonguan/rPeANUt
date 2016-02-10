@@ -39,6 +39,7 @@ public class Assemble {
 	HashMap<String, Integer> labels;
 	HashMap<Integer, Symbol> symbols;
 	HashMap<String, Macro> macros;
+	Defines defines;
 	ArrayList<Lineinfo> callstack;
 	ParseErrors errorlist;
 	StyledDocument doc;
@@ -54,6 +55,7 @@ public class Assemble {
 		this.labels = new HashMap<String, Integer>();
 		this.symbols = new HashMap<Integer, Symbol>();
 		this.macros = new HashMap<String, Macro>();
+		this.defines = new Defines();
 		this.callstack = new ArrayList<Lineinfo>();
 		this.errorlist = new ParseErrors();
 
@@ -135,7 +137,7 @@ public class Assemble {
 		try {
 
 			@SuppressWarnings("resource")
-			Tokenizer tok = new MySimpleTokenizer(text);
+			Tokenizer tok = new MySimpleTokenizer(defines, text);
 			int linenumber = 1;
 			if (doc != null)
 				doc.setCharacterAttributes(0, text.length(), saComment, true);
@@ -530,8 +532,36 @@ public class Assemble {
 										parseError(li,
 												"argument of include should be string");
 									}
+								} else if (tok.hasCurrent()
+										&& tok.current().equals("define")) {
+									tok.next();
+									
+									if (tok.hasCurrent()) {
+										Object k = tok.current();
+										if (k instanceof String) {
+											
+											tok.next();
+											
+											ArrayList<Object> dlist = new ArrayList<Object>();
+											while (tok.hasCurrent() && !(tok.current().equals("\n"))) {
+												dlist.add(tok.current());
+												tok.next();
+											}
+											consummednewline = true;
+											defines.put((String) k, dlist);
+											tok.next();
+										} else {
+											parseError(li, "#defines expect a string literal for the contant name");
+										}
+										
+										
+									} else {
+										parseError(li, "#define is empty");
+									}
+									
+									
 								} else {
-									parseError(li, "expecting #include");
+									parseError(li, "expecting #include or #define");
 								}
 							} else if (ins.equals("mend")) {
 								parseError(li, "MEND without MACRO");
@@ -544,7 +574,7 @@ public class Assemble {
 								aline = tok.nextLine();
 								linenumber++;
 								li = new Lineinfo(aline, linenumber, filename);
-								Tokenizer macp = new MySimpleTokenizer(aline);
+								Tokenizer macp = new MySimpleTokenizer(defines,aline);
 								// Get macro name
 								if (!macp.hasCurrent()
 										|| !(macp.current() instanceof String)) {
@@ -573,7 +603,7 @@ public class Assemble {
 									while (tok.hasCurrent()) {
 										aline = tok.nextLine();
 										linenumber++;
-										macp = new MySimpleTokenizer(aline);
+										macp = new MySimpleTokenizer(defines, aline);
 										if (macp.hasCurrent()
 												&& macp.current() instanceof String
 												&& ((String) macp.current())
@@ -649,7 +679,7 @@ public class Assemble {
 			ArrayList<ParseError> errorlist) {
 		StyledDocument ordoc = doc;
 		doc = null;
-		Tokenizer tok = new MySimpleTokenizer(str);
+		Tokenizer tok = new MySimpleTokenizer(defines,str);
 		Attribute res = parseAtt(tok, li, errorlist);
 		doc = ordoc;
 		return res;

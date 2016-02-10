@@ -1,8 +1,9 @@
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 
 /*
@@ -184,7 +185,8 @@ public class AssembleTest {
 	}
 
 	private void testtok(String string, Object[] objects) {
-		Tokenizer tok = new MySimpleTokenizer(string);
+		Defines defines = new Defines();
+		Tokenizer tok = new MySimpleTokenizer(defines, string);
 		int pos = 0;
 		while (tok.hasCurrent() && pos < objects.length) {
 			assertEquals("mismatch token " + pos,tok.current(),objects[pos]);

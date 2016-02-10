@@ -118,7 +118,7 @@ import javax.swing.KeyStroke;
 
 public class Peanut implements ActionListener, LayoutManager,
 		WindowFocusListener {
-	static final String version = "2.5";
+	static final String version = "3.0";
 
 	JFrame jframe;
 

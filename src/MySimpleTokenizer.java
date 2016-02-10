@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * MySimpleTokenizer - this tokenizer uses some simple check to break up the
  * tokens the text. The Integer and Double parsers are used to parse numbers.
@@ -12,15 +14,20 @@ public class MySimpleTokenizer extends Tokenizer {
 	private Object current;
 	private int currentstart;
 	private int currentend;
+	private Defines defines;
+	
+	private ArrayList<Object> pushback;
 
 	static final char whitespace[] = { ' ', '\t' };
 	static final char symbol[] = { ':', '#', '&', '\n' };
 	static final char hexdig[] = { 'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C',
 			'D', 'E', 'F' };
 
-	public MySimpleTokenizer(String text) {
+	public MySimpleTokenizer(Defines defines,  String text) {
 		this.text = text;
 		this.pos = 0;
+		this.defines = defines;
+		pushback = new ArrayList<Object>();
 		next();
 	}
 
@@ -33,6 +40,11 @@ public class MySimpleTokenizer extends Tokenizer {
 	}
 
 	public void next() {
+		if (pushback.size() > 0) {
+			current = pushback.remove(0);
+			return;
+		}
+		
 		consumewhite();
 		currentstart = pos;
 		if (pos >= text.length()) {
@@ -98,10 +110,12 @@ public class MySimpleTokenizer extends Tokenizer {
 				Long w;
 				try {
 					w = Long.parseLong(text.substring(start, pos), 16);
+					current = (Integer) (int) (w & 0xffffffff);
 				} catch (NumberFormatException nf2) {
 					w = null;
+					current = null;
 				}
-				current = (Integer) (int) (w & 0xffffffff);
+				
 			} else {
 				while (pos < text.length()
 						&& Character.isDigit(text.charAt(pos)))
@@ -113,13 +127,32 @@ public class MySimpleTokenizer extends Tokenizer {
 			pos++;
 			while (pos < text.length() && Character.isDigit(text.charAt(pos)))
 				pos++;
-			current = Integer.parseInt(text.substring(start, pos));
+			try {
+			   current = Integer.parseInt(text.substring(start, pos));
+			} catch (NumberFormatException nfe) {
+			   current = null;
+			}
 		} else {
 			int start = pos;
 			while (pos < text.length() && !isin(text.charAt(pos), symbol)
 					&& !isin(text.charAt(pos), whitespace))
 				pos++;
-			current = text.substring(start, pos);
+			String str = text.substring(start, pos);
+			
+			if (defines.containsKey(str)) {
+				ArrayList<Object> deflist =  defines.get(str);
+				if (deflist.size() == 0) {
+					next();
+				} else if (deflist.size() == 0) {
+					current = deflist.get(0);
+				} else {
+					current = deflist.get(0);
+					for (int i =1 ;i< deflist.size();i++) pushback.add(deflist.get(i));
+				}
+			} else {
+				current = str;
+			}
+			
 		}
 		currentend = pos;
 	}
