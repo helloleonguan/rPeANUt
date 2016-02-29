@@ -8,7 +8,8 @@ public class TokenizerDemo {
 			   "load #'\n' R4\n" +
 				"str : block #\"Hello\\n\"\n";
 	public static void main(String[] args) {
-		Tokenizer tok = new MySimpleTokenizer(prog1);
+		Defines defines = new Defines();
+		Tokenizer tok = new MySimpleTokenizer(defines,prog1);
 		while (tok.hasCurrent()) {
 			System.out.println("tok : ["  + tok.current() + "]");
 			tok.next();

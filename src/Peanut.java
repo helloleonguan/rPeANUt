@@ -118,7 +118,7 @@ import javax.swing.KeyStroke;
 
 public class Peanut implements ActionListener, LayoutManager,
 		WindowFocusListener {
-	static final String version = "3.0";
+	static final String version = "3.1";
 
 	JFrame jframe;
 
@@ -134,7 +134,7 @@ public class Peanut implements ActionListener, LayoutManager,
 
 	JFileChooser jfcs;
 
-	Preferences prefs;
+	static Preferences prefs;
 
 	static final String LOAD = "load";
 	static final String LOADLAST = "loadlast";
@@ -153,6 +153,7 @@ public class Peanut implements ActionListener, LayoutManager,
 
 	int lastpoke;
 	private static final String FONTSIZE = "editfont";
+	private static final String FONTUISIZE = "uifont";
 	private static final String CHANGEECHO = "changeecho";
 	private static final String CHANGEPROFILE = "changeprofile";
 	private File currentFileName = null;
@@ -181,6 +182,7 @@ public class Peanut implements ActionListener, LayoutManager,
 		bar = new JMenuBar();
 
 		fileMenu = new JMenu("File");
+		fileMenu.setFont(setUIFont(fileMenu.getFont()));
 		createMenuItem(fileMenu, "New", NEW,
 				KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
 		createMenuItem(fileMenu, "Load", LOAD,
@@ -196,11 +198,14 @@ public class Peanut implements ActionListener, LayoutManager,
 				KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
 
 		editMenu = new JMenu("Edit");
+		editMenu.setFont(setUIFont(editMenu.getFont()));
 		createMenuItem(editMenu, "Undo", UNDO,
 				KeyStroke.getKeyStroke(KeyEvent.VK_Z, ActionEvent.CTRL_MASK));
-		createMenuItem(editMenu, "Change Font Size", FONTSIZE, null);
+		createMenuItem(editMenu, "Change Edit Font Size", FONTSIZE, null);
+		createMenuItem(editMenu, "Change UI Font Size", FONTUISIZE, null);
 
 		codeMenu = new JMenu("Code");
+		codeMenu.setFont(setUIFont(codeMenu.getFont()));
 		createMenuItem(codeMenu, "Assemble", ASSEMBLE, KeyStroke.getKeyStroke(
 				KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK));
 		createMenuItem(codeMenu, "Run", RUN, KeyStroke.getKeyStroke(
@@ -241,15 +246,11 @@ public class Peanut implements ActionListener, LayoutManager,
 									// absorb any extra space given by resizing.
 		// mainpanel.setLayout(this);
 
-		editcode = new EditCode(prefs.getInt("fontsize", 16));
+		editcode = new EditCode(prefs.getInt(FONTSIZE, 16));
 
-		assembleJButton = new JButton("Assemble");
-		assembleJButton.addActionListener(this);
-		assembleJButton.setActionCommand(ASSEMBLE);
-
-		pokeJButton = new JButton("Poke");
-		pokeJButton.addActionListener(this);
-		pokeJButton.setActionCommand(POKE);
+		
+		assembleJButton = makeButton("Assemble",ASSEMBLE);
+		pokeJButton = makeButton("Poke", POKE);
 
 		editpanel.add(assembleJButton);
 		editpanel.add(pokeJButton);
@@ -273,9 +274,25 @@ public class Peanut implements ActionListener, LayoutManager,
 		jframe.setVisible(true);
 	}
 
+	private JButton makeButton(String title, String command) {
+		// TODO Auto-generated method stub
+		JButton jb = new JButton(title);
+		jb.setFont(setUIFont(jb.getFont()));
+		jb.addActionListener(this);
+		jb.setActionCommand(command);
+		return jb;
+	}
+
+	static public Font setUIFont(Font font) {
+		
+		//return font.deriveFont(prefs.getInt(FONTUISIZE, 14));
+		return new Font(Font.MONOSPACED, Font.PLAIN, prefs.getInt(FONTUISIZE, 14));
+	}
+
 	private JCheckBoxMenuItem createCheckBox(JMenu menu, String name, String command,
 			boolean state) {
 		JCheckBoxMenuItem item = new JCheckBoxMenuItem(name);
+		item.setFont(setUIFont(item.getFont()));
 		item.setState(state);
 		item.setActionCommand(command);
 		item.addActionListener(this);
@@ -286,6 +303,7 @@ public class Peanut implements ActionListener, LayoutManager,
 	private void createMenuItem(JMenu menu, String name, String command,
 			KeyStroke ks) {
 		JMenuItem mi = new JMenuItem(name);
+		mi.setFont(setUIFont(mi.getFont()));
 		mi.setActionCommand(command);
 		mi.addActionListener(this);
 		if (ks != null)
@@ -320,6 +338,8 @@ public class Peanut implements ActionListener, LayoutManager,
 			simulate.stopPush();
 		} else if (ae.getActionCommand().equals(FONTSIZE)) {
 			changeFont();
+		} else if (ae.getActionCommand().equals(FONTUISIZE)) {
+			changeUIFont();
 		} else if (ae.getActionCommand().equals(CHANGEECHO)) {
 			simulate.toggleEcho();
 			prefs.putBoolean("echo", simulate.getEchoInput());
@@ -375,17 +395,27 @@ public class Peanut implements ActionListener, LayoutManager,
 	}
 
 	private void changeFont() {
-		String input = JOptionPane.showInputDialog("Enter a new font size: ");
+		String input = JOptionPane.showInputDialog("Enter a new font size (current is " + prefs.getInt(FONTSIZE,16)   + ") : ");
 		try {
 			int size = Integer.parseInt(input);
 			final Font font = new Font(Font.MONOSPACED, Font.PLAIN, size);
 			editcode.text.setFont(font);
 			editcode.ln.font = font;
 			simulate.memtable.setFont(font);
-			prefs.putInt("fontsize", size);
+			prefs.putInt(FONTSIZE, size);
 		} catch (NumberFormatException e) {
 		}
 	}
+	
+	private void changeUIFont() {
+		String input = JOptionPane.showInputDialog("Enter a UI new font size (current is " + prefs.getInt(FONTUISIZE,14)   + ", note this requires the program to restart for it to take effect) : ");
+		try {
+			int size = Integer.parseInt(input);
+			prefs.putInt(FONTUISIZE, size);
+		} catch (NumberFormatException e) {
+		}
+	}
+	
 
 	private void poke() {
 
@@ -421,7 +451,6 @@ public class Peanut implements ActionListener, LayoutManager,
 		} else {
 			simulate.update();
 		}
-
 	}
 
 	private void exit() {
@@ -702,5 +731,10 @@ public class Peanut implements ActionListener, LayoutManager,
 	public void windowLostFocus(WindowEvent e) {
 		D.p("focus lost");
 		simulate.cache.setAlwaysOnTop(false);
+	}
+
+	public static int getUIFontHeight() {
+		// TODO Auto-generated method stub
+		return  prefs.getInt(FONTUISIZE, 14) * 15 / 12;
 	}
 }

@@ -26,7 +26,7 @@ import javax.swing.JTextField;
 
 public class Word extends JTextField implements KeyListener {
 	protected int value;
-	static Font wordfont = new Font(Font.MONOSPACED, Font.PLAIN, 14);
+	static Font wordfont = Peanut.setUIFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
 	static String str32 = "0x00000000";
 	
 	public Word() {
@@ -112,8 +112,9 @@ public class Word extends JTextField implements KeyListener {
 		if (text.length() > 10) {
 			text = text.substring(0, 10);
 			this.setText(text);
-		}
-		MySimpleTokenizer tok = new MySimpleTokenizer(text);
+		} 
+		Defines defines = new Defines();
+		MySimpleTokenizer tok = new MySimpleTokenizer(defines,text);
 		if (tok.hasCurrent() && tok.current() instanceof Integer) {
 			value = ((Integer) tok.current()).intValue();
 		}

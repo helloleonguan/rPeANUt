@@ -90,7 +90,7 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 	boolean terminalCharInterrupt;
 
 	Screen screen;
-	 SimWorker simworker;
+	SimWorker simworker;
 
 	Memory memory;
 	JTable memtable;
@@ -101,8 +101,6 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 	HardDisk harddisk;
 
 	JButton step, run, fast, slow, stop;
-
-	
 
 	enum RunSpeed {
 		FAST, NORMAL, SLOW
@@ -149,7 +147,8 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 
 		memory = new Memory(this);
 		memtable = new JTable(memory);
-		// memtable.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 8));
+		memtable.setRowHeight(Peanut.getUIFontHeight());
+		// memtable.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 32));
 		memtable.getColumnModel().getColumn(0).setHeaderValue("");
 		memtable.getColumnModel().getColumn(0).setMaxWidth(5);
 		memtable.getColumnModel().getColumn(0).setPreferredWidth(5);
@@ -239,7 +238,8 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 				.setCellRenderer(new CenterRender());
 		memtable.getColumnModel().getColumn(5).setHeaderValue("");
 		memtable.getColumnModel().getColumn(5).setPreferredWidth(30);
-		memtable.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
+		memtable.setFont(Peanut.setUIFont(new Font(Font.MONOSPACED, Font.PLAIN,
+				14)));
 
 		profileColumn = memtable.getColumnModel().getColumn(1);
 		if (!profile) {
@@ -254,7 +254,7 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 		harddisk = new HardDisk();
 
 		terminal = new JTextArea(10, 10);
-		terminal.setFont(terminalfont);
+		terminal.setFont(Peanut.setUIFont(terminalfont));
 
 		terminal.addKeyListener(this);
 		terminal.addFocusListener(this);
@@ -280,35 +280,28 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 		add(SR);
 		add(PC);
 
-		step = new JButton("Step");
-		step.setActionCommand("Step");
-		step.addActionListener(this);
-		run = new JButton("Run");
-		run.setActionCommand("Run");
-		run.addActionListener(this);
-		fast = new JButton("Fast");
-		fast.setActionCommand("Fast");
-		fast.addActionListener(this);
-		slow = new JButton("Slow");
-		slow.setActionCommand("Slow");
-		slow.addActionListener(this);
-		stop = new JButton("Stop");
-		stop.setActionCommand("Stop");
-		stop.addActionListener(this);
+		step = makeButton("Step");
+		run = makeButton("Run");
+		fast = makeButton("Fast");
+		slow = makeButton("Slow");
+		stop = makeButton("Stop");
 
-		add(step);
-
-		add(run);
-
-		add(fast);
-		add(slow);
-		add(stop);
 		add(countLabel);
 
 		this.add(screen);
 		this.add(terminal);
 		this.add(memscroll);
 
+	}
+
+	private JButton makeButton(String title) {
+
+		JButton b = new JButton(title);
+		b.setFont(Peanut.setUIFont(b.getFont()));
+		b.setActionCommand(title);
+		b.addActionListener(this);
+		add(b);
+		return b;
 	}
 
 	public void reset() {
@@ -341,7 +334,7 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 		countLabel.setText("Count: " + count);
 		screen.refreshAll();
 		// this.validateTree(); had some issues in java 7
-		//this.validate();
+		// this.validate();
 		this.repaint();
 	}
 
@@ -624,39 +617,39 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 	}
 
 	public void runPush(RunSpeed runspeed) {
-		 if (stoprun && !halt) {
-             stoprun = false;
-             this.runspeed = runspeed;
-             switch (runspeed) {
-             case FAST:
-                     delay = 0;
-                     fastupdate();
-                     break;
-             case NORMAL:
-                     delay = 1;
-                     normalupdate();
-                     break;
-             case SLOW:
-                     delay = 1000;
-                     update();
-                     break;
-             }
-             simworker = new SimWorker(this);
-             simworker.execute();
-     } else if (!halt) {
-             this.runspeed = runspeed;
-             switch (runspeed) {
-             case FAST:
-                     delay = 0;
-                     break;
-             case NORMAL:
-                     delay = 1;
-                     break;
-             case SLOW:
-                     delay = 1000;
-                     break;
-             }
-     }
+		if (stoprun && !halt) {
+			stoprun = false;
+			this.runspeed = runspeed;
+			switch (runspeed) {
+			case FAST:
+				delay = 0;
+				fastupdate();
+				break;
+			case NORMAL:
+				delay = 1;
+				normalupdate();
+				break;
+			case SLOW:
+				delay = 1000;
+				update();
+				break;
+			}
+			simworker = new SimWorker(this);
+			simworker.execute();
+		} else if (!halt) {
+			this.runspeed = runspeed;
+			switch (runspeed) {
+			case FAST:
+				delay = 0;
+				break;
+			case NORMAL:
+				delay = 1;
+				break;
+			case SLOW:
+				delay = 1000;
+				break;
+			}
+		}
 
 	}
 
@@ -678,7 +671,7 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 			runPush(RunSpeed.FAST);
 		} else if (a.getActionCommand().equals("Stop")) {
 			stopPush();
-		} 
+		}
 
 	}
 

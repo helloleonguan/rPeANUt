@@ -120,7 +120,11 @@ public class MySimpleTokenizer extends Tokenizer {
 				while (pos < text.length()
 						&& Character.isDigit(text.charAt(pos)))
 					pos++;
+				try {
 				current = Integer.parseInt(text.substring(start, pos));
+				} catch (NumberFormatException nfe) {
+					current = null;
+				}
 			}
 		} else if (text.charAt(pos) == '-') {
 			int start = pos;

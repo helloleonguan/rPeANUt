@@ -2,6 +2,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -161,45 +162,31 @@ public class Cache extends JFrame implements ActionListener {
 		//this.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
 
 		cacheLabel = new JLabel("Cache mode: ");
-
-		noneRadio = new JRadioButton("Off");
-		noneRadio.setActionCommand(NONE_RADIO);
-		noneRadio.addActionListener(this);
-		noneRadio.setSelected(true);
-
-		fullyRadio = new JRadioButton("Fully associative");
-		fullyRadio.setActionCommand(FULLY_RADIO);
-		fullyRadio.addActionListener(this);
-
-		directRadio = new JRadioButton("Direct associative");
-		directRadio.setActionCommand(DIRECT_RADIO);
-		directRadio.addActionListener(this);
-
-		setRadio = new JRadioButton("Set associative");
-		setRadio.setActionCommand(SET_RADIO);
-		setRadio.addActionListener(this);
-
+		cacheLabel.setFont(Peanut.setUIFont(cacheLabel.getFont()));
 		buttonPanel.add(cacheLabel);
-		buttonPanel.add(noneRadio);
-		buttonPanel.add(fullyRadio);
-		buttonPanel.add(directRadio);
-		buttonPanel.add(setRadio);
-
+		
 		modeGroup = new ButtonGroup();
-		modeGroup.add(noneRadio);
-		modeGroup.add(fullyRadio);
-		modeGroup.add(directRadio);
-		modeGroup.add(setRadio);
+		noneRadio = makeButton("Off", NONE_RADIO);
+		noneRadio.setSelected(true);
+		fullyRadio = makeButton("Fully associative", FULLY_RADIO);
+		directRadio = makeButton("Direct associative", DIRECT_RADIO);
+		setRadio = makeButton("Set associative", SET_RADIO);
+
 
 		statusLabel = new JLabel("WAITING");
+		statusLabel.setFont(Peanut.setUIFont(statusLabel.getFont()));
 		statusLabel.setOpaque(true);
 		statusLabel.setBackground(Color.WHITE);
 
 		actionLabel = new JLabel();
+		actionLabel.setFont(Peanut.setUIFont(actionLabel.getFont()));
 		
 		rateLabel = new JLabel();
-
+		rateLabel.setFont(Peanut.setUIFont(rateLabel.getFont()));
+		
 		timeLabel = new JLabel("Time: 0ns");
+	    timeLabel.setFont(Peanut.setUIFont(timeLabel.getFont()));
+		
 		timeLabel.setPreferredSize(new Dimension(100, 20));
 		statusPanel.add(statusLabel);
 		statusPanel.add(actionLabel);
@@ -237,6 +224,9 @@ public class Cache extends JFrame implements ActionListener {
 				return c;
 			}
 		};
+		linesTable.setRowHeight(Peanut.getUIFontHeight());
+		linesTable.setFont(Peanut.setUIFont(new Font(Font.MONOSPACED, Font.PLAIN,
+				14)));
 		// Keep details on the ID column so it can be removed/replaced
 		idColumn = linesTable.getColumnModel().getColumn(0);
 		idColumnVisible = true;
@@ -251,6 +241,8 @@ public class Cache extends JFrame implements ActionListener {
 		cacheSlider = new JSlider(JSlider.HORIZONTAL, 0, 8, (int)Math.sqrt(cachesize));
 		cacheSlider.setPaintTicks(true);
 		cacheSliderLabel = new JLabel("Cache size: " + cachesize);
+		cacheSliderLabel.setFont(Peanut.setUIFont(cacheSliderLabel.getFont()));
+		
 		cacheSliderPanel.add(cacheSliderLabel);
 		cacheSliderPanel.add(cacheSlider);
 
@@ -275,6 +267,8 @@ public class Cache extends JFrame implements ActionListener {
 		lineSlider = new JSlider(JSlider.HORIZONTAL, 0, 8, (int)Math.sqrt(linesize));
 		lineSlider.setPaintTicks(true);
 		lineSliderLabel = new JLabel("Line size: " + linesize);
+		lineSliderLabel.setFont(Peanut.setUIFont(lineSliderLabel.getFont()));
+		
 		lineSliderPanel.add(lineSliderLabel, BorderLayout.LINE_START);
 		lineSliderPanel.add(lineSlider, BorderLayout.CENTER);
 		lineSlider.addChangeListener(new ChangeListener() {
@@ -292,6 +286,8 @@ public class Cache extends JFrame implements ActionListener {
 		setSlider = new JSlider(JSlider.HORIZONTAL, 0, (int)Math.sqrt(cachesize), (int)Math.sqrt(setsize));
 		setSlider.setPaintTicks(true);
 		setSliderLabel = new JLabel("Set size: " + setsize);
+		setSliderLabel.setFont(Peanut.setUIFont(setSliderLabel.getFont()));
+		
 		setSliderPanel.add(setSliderLabel, BorderLayout.LINE_START);
 		setSliderPanel.add(setSlider, BorderLayout.CENTER);
 		setSlider.addChangeListener(new ChangeListener() {
@@ -317,6 +313,16 @@ public class Cache extends JFrame implements ActionListener {
 		pack();
 
 		setMode(Mode.NONE);
+	}
+
+	private JRadioButton makeButton(String t, String command) {
+		JRadioButton b = new JRadioButton(t);
+		b.setFont(Peanut.setUIFont(b.getFont()));
+		b.setActionCommand(command);
+		b.addActionListener(this);
+		modeGroup.add(b);
+		buttonPanel.add(b);
+		return b;
 	}
 
 	void initlines() {

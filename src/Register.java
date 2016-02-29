@@ -38,8 +38,10 @@ public class Register extends JPanel implements  MouseListener {
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		this.setBorder(new EmptyBorder(2, 2, 2, 2));
 		alab = new JLabel(name);
+		alab.setFont(Peanut.setUIFont(alab.getFont()));
 		this.add(alab);
 		// this.add(new JLabel(":"));
+		value.setFont(Peanut.setUIFont(value.getFont()));
 		this.add(value);
 		
 		alab.addMouseListener(this);
