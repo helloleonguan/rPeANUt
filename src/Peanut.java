@@ -134,7 +134,7 @@ public class Peanut implements ActionListener, LayoutManager,
 
 	JFileChooser jfcs;
 
-	static Preferences prefs;
+	static Preferences prefs = null;
 
 	static final String LOAD = "load";
 	static final String LOADLAST = "loadlast";
@@ -286,6 +286,7 @@ public class Peanut implements ActionListener, LayoutManager,
 	static public Font setUIFont(Font font) {
 		
 		//return font.deriveFont(prefs.getInt(FONTUISIZE, 14));
+		if (prefs == null) return new Font(Font.MONOSPACED, Font.PLAIN,  14);
 		return new Font(Font.MONOSPACED, Font.PLAIN, prefs.getInt(FONTUISIZE, 14));
 	}
 
@@ -608,7 +609,7 @@ public class Peanut implements ActionListener, LayoutManager,
 						simulate.reset();
 						ArrayList<ParseError> errorlist = Assemble.assemble(
 								text, simulate.memory);
-						if (errorlist.size() > 0) {
+						if (errorlist.size() == 0) {
 							if (objdump) {
 								simulate.memory.objdump(System.out);
 							} else {
@@ -735,6 +736,7 @@ public class Peanut implements ActionListener, LayoutManager,
 
 	public static int getUIFontHeight() {
 		// TODO Auto-generated method stub
+		if (prefs == null) return 12;
 		return  prefs.getInt(FONTUISIZE, 14) * 15 / 12;
 	}
 }

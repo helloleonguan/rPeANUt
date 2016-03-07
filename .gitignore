@@ -1,1 +1,10 @@
 /bin
+*~
+test*.s
+.classpath
+.project
+bug1.s
+.gitignore
+docs/rPeANUtv3.0bspec.odt
+*.log
+

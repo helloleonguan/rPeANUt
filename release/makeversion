@@ -2,7 +2,8 @@
 
 mkdir tmp
 cd tmp
-cp /home/ericm/courses/java/rpeanut/src/* .
+cp /home/ericm/courses/java/rpeanut/src/*.java .
+javac Peanut.java
 jar cmf /home/ericm/courses/java/rpeanut/release/MANIFEST.MF /home/ericm/courses/java/rpeanut/release/rPeANUt$1.jar .
 cd ..
 rm -r tmp
