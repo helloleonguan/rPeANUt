@@ -118,7 +118,7 @@ import javax.swing.KeyStroke;
 
 public class Peanut implements ActionListener, LayoutManager,
 		WindowFocusListener {
-	static final String version = "3.1";
+	static final String version = "3.2";
 
 	JFrame jframe;
 
@@ -158,6 +158,7 @@ public class Peanut implements ActionListener, LayoutManager,
 	private static final String CHANGEPROFILE = "changeprofile";
 	private File currentFileName = null;
 	private static final String PIPEFILE = "pipe";
+	private static final String PIPEFILELAST = "pipelast";
 
 	private static final String CHANGEAUTOHIGHLIGHT = "changeautohighlight";
 
@@ -227,6 +228,8 @@ public class Peanut implements ActionListener, LayoutManager,
 
 		
 		createMenuItem(codeMenu, "Input file to terminal", PIPEFILE, null);
+		createMenuItem(codeMenu, "Input last file to terminal", PIPEFILELAST, KeyStroke.getKeyStroke(
+				KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK));
 
 		createMenuItem(codeMenu, "Show cache simulator", SHOWCACHE, null);
 
@@ -353,7 +356,9 @@ public class Peanut implements ActionListener, LayoutManager,
 		} else if (ae.getActionCommand().equals(SAVEAS)) {
 			saveas();
 		} else if (ae.getActionCommand().equals(PIPEFILE)) {
-			pipeFile();
+			pipeFile();		
+		} else if (ae.getActionCommand().equals(PIPEFILELAST)) {
+				pipeFileLast();
 		} else if (ae.getActionCommand().equals(SHOWCACHE)) {
 			simulate.cache.setVisible(true);
 		}
@@ -368,6 +373,7 @@ public class Peanut implements ActionListener, LayoutManager,
 		int res = jfcs.showOpenDialog(jframe);
 		if (res == JFileChooser.APPROVE_OPTION) {
 			File pipeFile = jfcs.getSelectedFile();
+			prefs.put("lastpipefile", pipeFile.getPath());
 			D.p("Loading file: " + pipeFile);
 			try {
 				BufferedReader reader = new BufferedReader(new FileReader(
@@ -384,7 +390,7 @@ public class Peanut implements ActionListener, LayoutManager,
 				while ((c = reader.read()) != -1) {
 					if (simulate.getEchoInput())
 						simulate.terminalAppend(c);
-					simulate.terminalChar += ((char) c);
+					simulate.terminalChar.append((char) c);
 				}
 				reader.close();
 			} catch (FileNotFoundException e) {
@@ -394,6 +400,31 @@ public class Peanut implements ActionListener, LayoutManager,
 			}
 		}
 	}
+	
+	private void pipeFileLast() {
+		String last = prefs.get("lastpipefile", null);
+		if (last != null) {
+			D.p("Loading last file: " + last);
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(
+						last));
+			
+				int c;
+				while ((c = reader.read()) != -1) {
+					if (simulate.getEchoInput())
+						simulate.terminalAppend(c);
+					simulate.terminalChar.append((char) c);
+				}
+				reader.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	
 
 	private void changeFont() {
 		String input = JOptionPane.showInputDialog("Enter a new font size (current is " + prefs.getInt(FONTSIZE,16)   + ") : ");

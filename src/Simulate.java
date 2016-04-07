@@ -6,7 +6,9 @@ import java.awt.Font;
 import java.awt.HeadlessException;
 import java.awt.LayoutManager;
 import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,19 +16,18 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.EventObject;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.Timer;
+import javax.swing.SwingUtilities;
 import javax.swing.event.CellEditorListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -58,7 +59,7 @@ import javax.swing.table.TableColumn;
  */
 
 public class Simulate extends JPanel implements ActionListener, KeyListener,
-		FocusListener, LayoutManager {
+		FocusListener, LayoutManager, MouseListener {
 
 	static final Dimension scrollsize = new Dimension(350, 300);
 
@@ -86,7 +87,7 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 	Register SP, IR, SR, PC;
 
 	private JTextArea terminal;
-	String terminalChar;
+	StringBuffer terminalChar;
 	boolean terminalCharInterrupt;
 
 	Screen screen;
@@ -258,12 +259,13 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 
 		terminal.addKeyListener(this);
 		terminal.addFocusListener(this);
+		terminal.addMouseListener(this);
 
 		terminal.setEditable(false);
 		terminal.setPreferredSize(new Dimension(scrollsize.width,
 				scrollsize.height / 2));
 
-		terminalChar = "";
+		terminalChar = new StringBuffer();
 		terminalCharInterrupt = false;
 		screen = new Screen(memory);
 
@@ -320,7 +322,7 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 		IR.reset();
 		SP.set(0x7000);
 		SR.reset();
-		terminalChar = "";
+		terminalChar = new StringBuffer();
 		terminalCharInterrupt = false;
 		memory.fireTableDataChanged();
 		terminal.setText("");
@@ -693,7 +695,10 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 			try {
 				str = (String) Toolkit.getDefaultToolkit().getSystemClipboard()
 						.getData(DataFlavor.stringFlavor);
-				terminalChar = terminalChar + str;
+				terminalChar.append(str);
+				if (echoInput) {
+					terminalAppend(str);
+				}
 			} catch (HeadlessException e) {
 				e.printStackTrace();
 			} catch (UnsupportedFlavorException e) {
@@ -705,7 +710,7 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 		} else if (!(a.isControlDown() && (a.getKeyChar() == 0x0014
 				|| a.getKeyChar() == 0x0010 || a.getKeyChar() == 0x0002 || a
 					.getKeyChar() == 0x0012))) {
-			terminalChar = terminalChar + a.getKeyChar();
+			terminalChar.append(a.getKeyChar());
 			if (echoInput) {
 				terminalAppend(a.getKeyChar());
 			}
@@ -725,7 +730,29 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 		}
 
 		terminal.setText(content);
+	}
+	
+	public void terminalAppend(String str) {
+		String content = terminal.getText() + "\n" + wrapit(TERMINALWIDTH,TERMINALLINES,str);
+		while (countlines(content) > TERMINALLINES) {
+			content = content.substring(content.indexOf('\n') + 1);
+		}
+		terminal.setText(content);
+	}
+	
 
+	private String wrapit(int w, int l, String str) {
+		int pos = 0;
+		StringBuffer res = new StringBuffer();
+		if (str.length() > w * l) {
+			pos = str.length() - w*l;
+		}
+		while (pos < str.length()) {
+			res.append(str.substring(pos, Math.min(pos+w,str.length())));
+			res.append("\n");
+			pos += w;
+		}
+		return res.toString();
 	}
 
 	private int countlines(String content) {
@@ -850,6 +877,62 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 	public void removeLayoutComponent(Component arg0) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		D.p("mouse clicked " + e);
+		
+		 if (SwingUtilities.isMiddleMouseButton(e)) {
+			 D.p(" middle buttle ");
+			 Clipboard cb = getToolkit().getSystemClipboard();
+             Transferable trans = cb.getContents(this);
+           
+               
+                 try {
+                	String str =  (String) trans.getTransferData(DataFlavor.stringFlavor);
+                    D.p("str:" + str);
+                    
+                	terminalChar.append(str);
+    				if (echoInput) {
+    					terminalAppend(str);
+    				}
+                    
+                 } catch (UnsupportedFlavorException | IOException ex) {
+                    D.p("problem " + ex);
+                 }
+		    
+		 }
+				 
+				 
+				 //isRightMouseButton(e)) {
+
+             
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

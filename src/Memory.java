@@ -107,7 +107,7 @@ public class Memory extends AbstractTableModel {
 					return 0;
 				} else {
 					int c = simulate.terminalChar.charAt(0);
-					simulate.terminalChar = simulate.terminalChar.substring(1);
+					simulate.terminalChar.deleteCharAt(0);
 					return c;
 
 				}
