@@ -249,7 +249,7 @@ public class Peanut implements ActionListener, LayoutManager,
 									// absorb any extra space given by resizing.
 		// mainpanel.setLayout(this);
 
-		editcode = new EditCode(prefs.getInt(FONTSIZE, 16));
+		editcode = new EditCode(prefs.getInt(FONTSIZE, 16), this);
 
 		
 		assembleJButton = makeButton("Assemble",ASSEMBLE);
@@ -512,8 +512,11 @@ public class Peanut implements ActionListener, LayoutManager,
 	private void save() {
 		if (currentFileName == null) {
 			saveas();
+			setTitle();
 		} else {
 			editcode.save(currentFileName);
+			setTitle();
+			new ToastMessage(jframe,"Saved",setUIFont(null),2000);
 		}
 	}
 
@@ -522,6 +525,7 @@ public class Peanut implements ActionListener, LayoutManager,
 		if (res == JFileChooser.APPROVE_OPTION) {
 			File file = jfcs.getSelectedFile();
 			editcode.save(file);
+			setTitle();
 			prefs.put("lastfile", file.getPath());
 			setCurrentFile(file);
 		}
@@ -550,13 +554,18 @@ public class Peanut implements ActionListener, LayoutManager,
 
 	private void setCurrentFile(File file) {
 		currentFileName = file;
-		if (file != null) {
+		setTitle();
+	}
+	
+	public void setTitle() {
+		if (currentFileName != null) {
 			jframe.setTitle("rPeANUt - " + version + ": "
-					+ currentFileName.getAbsolutePath());
+					+ currentFileName.getAbsolutePath() + " " + (editcode.changedFile?"*":""));
 		} else {
-			jframe.setTitle("rPeANUt - " + version);
+			if (jframe != null && editcode !=null ) jframe.setTitle("rPeANUt - " + version + ": " + (editcode.changedFile?"*":""));
 		}
 	}
+	
 
 	private void loadLast() {
 		String last = prefs.get("lastfile", null);

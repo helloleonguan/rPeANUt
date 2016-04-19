@@ -63,6 +63,7 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 	ParseErrors errorlist;
 	Timer updateTimer;
 	Memory nullMemory;
+	final Peanut peanut;
 	
 
 	private class UndoItem {
@@ -77,9 +78,10 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 
 	static final int MAXUNDO = 200;
 
-	public EditCode(int fontsize) {
+	public EditCode(int fontsize, Peanut peanut) {
 		textChangedSinceHighlight = true;
 		errorlist = null;
+		this.peanut = peanut;
 		nullMemory = new Memory(new Simulate(false,false,false));
 		undolist = new LinkedList<UndoItem>();
 		text = new JTextPane() {
@@ -131,12 +133,13 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 				}
 			}
 		};
+		changedFile = false;
+
 		snap();
 		Font textfont = new Font(Font.MONOSPACED, Font.PLAIN, fontsize);
 		text.setFont(textfont);
 		ln = new LineNumbers(textfont);
-		changedFile = false;
-
+	
 		text.getDocument().addDocumentListener(new DocumentListener() {
 			@SuppressWarnings("unused")
 			public String getText() {
@@ -160,9 +163,11 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 
 			@Override
 			public void insertUpdate(DocumentEvent de) {
-				snap(de);
 				changedFile = true;
 				textChangedSinceHighlight = true;
+			
+				snap(de);
+				
 				//System.out.println("insertUpdate");
 				// ln.setText(getText());
 				// System.out.println("B" + scroll.getVisibleRect());
@@ -287,7 +292,7 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 
 	public void snap() {
 		snap(null);
-
+		
 	}
 
 	private void snap(DocumentEvent de) {
@@ -295,6 +300,8 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 		if (de != null) {
 			pos += de.getLength();
 		}
+		 peanut.setTitle();
+
 		undolist.add(new UndoItem(text.getText(), pos));
 		if (undolist.size() > MAXUNDO)
 			undolist.remove(0);
