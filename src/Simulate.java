@@ -809,8 +809,8 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 	@Override
 	public void layoutContainer(Container arg0) {
 		Dimension size = this.getSize();
-		Dimension rs = SP.getMinimumSize();
-
+		Dimension rs = SP.getPreferredSize();
+		
 		int r2x = size.width - rs.width;
 		int r1x = size.width - 2 * rs.width;
 		int ry = 0;

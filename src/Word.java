@@ -36,9 +36,9 @@ public class Word extends JTextField implements KeyListener {
 		this.setFont(wordfont);
 		int width = this.getFontMetrics(wordfont).stringWidth(str32) + 5;
 		int height = this.getFontMetrics(wordfont).getHeight() + 3;
-		this.setPreferredSize(new Dimension(width, height));
+	//	this.setPreferredSize(new Dimension(width, height));
 		this.setMinimumSize(new Dimension(width, height));
-		this.setMaximumSize(new Dimension(width, height));
+	//	this.setMaximumSize(new Dimension(width, height));
 	}
 
 	public Word(int v1) {
