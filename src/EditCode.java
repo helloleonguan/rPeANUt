@@ -64,7 +64,7 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 	Timer updateTimer;
 	Memory nullMemory;
 	final Peanut peanut;
-	
+	static String lf = System.getProperty("line.separator");
 
 	private class UndoItem {
 		String text;
@@ -93,7 +93,7 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 					g.setColor(Color.red);
 					
 					String t = text.getText();
-					String str[] = t.split("\n");
+					String str[] = t.split(lf);
 					int pos = 0;
 					for (int i = 0; i < str.length; i++) {
 						if (str[i].length() > 0 && errorlist.hasline(i+1)) {
@@ -264,7 +264,7 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 		StringBuffer sb = new StringBuffer();
 		String line;
 		while ((line = br.readLine()) != null) {
-			sb.append(line + "\n");
+			sb.append(line + lf);
 		}
 		br.close();
 		return (sb.toString());
@@ -331,7 +331,7 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 	@Override
 	public void run() {
 		String t = text.getText();
-		String str[] = t.split("\n");
+		String str[] = t.split(lf);
 
 		int pos = 0;
 		for (int i = 0; i < str.length; i++) {
