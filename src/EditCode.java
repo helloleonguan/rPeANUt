@@ -24,6 +24,7 @@ import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Element;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
@@ -64,8 +65,9 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 	Timer updateTimer;
 	Memory nullMemory;
 	final Peanut peanut;
-	static String lf = System.getProperty("line.separator");
-
+//	static String lf = System.getProperty("line.separator");
+	static String lf = "\n";
+	
 	private class UndoItem {
 		String text;
 		int caretPos;
@@ -92,8 +94,14 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 				if (errorlist != null && autohighlight) {
 					g.setColor(Color.red);
 					
-					String t = text.getText();
-					String str[] = t.split(lf);
+					String t;
+					try {
+						t = text.getDocument().getText(0, text.getDocument().getLength());
+					} catch (BadLocationException e1) {
+						t = text.getText();
+					} 
+							
+					String str[] = t.split("\n");
 					int pos = 0;
 					for (int i = 0; i < str.length; i++) {
 						if (str[i].length() > 0 && errorlist.hasline(i+1)) {
@@ -133,6 +141,7 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 				}
 			}
 		};
+		text.getDocument().putProperty(DefaultEditorKit.EndOfLineStringProperty, "\n");
 		changedFile = false;
 
 		snap();
