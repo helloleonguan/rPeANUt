@@ -1,3 +1,4 @@
+import java.awt.Adjustable;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -249,7 +250,7 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 
 		memscroll = new JScrollPane(memtable);
 		memscroll.setPreferredSize(scrollsize);
-
+	
 		cache = new Cache(memory);
 
 		harddisk = new HardDisk();
@@ -337,6 +338,9 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 		screen.refreshAll();
 		// this.validateTree(); had some issues in java 7
 		// this.validate();
+		
+	    centerMemoryScroll();
+		
 		this.repaint();
 	}
 
@@ -344,9 +348,7 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 		fastcount++;
 		if (fastcount >= 1000) {
 			update();
-			/*
-			 * try { Thread.sleep(1); } catch (InterruptedException e) {}
-			 */
+			
 			fastcount = 0;
 		}
 	}
@@ -611,7 +613,15 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 		if (stoprun && !halt) {
 			step();
 			update();
+			
 		}
+	}
+
+	private void centerMemoryScroll() {
+		Adjustable sb = memscroll.getVerticalScrollBar();
+		int tpos = memory.getScrollPos(PC.get());
+		int rows = memtable.getRowCount();
+		sb.setValue(Math.max(0, (sb.getMaximum() * tpos / rows) - (sb.getVisibleAmount()/2)));
 	}
 
 	public void runPush() {

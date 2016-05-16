@@ -82,6 +82,8 @@ public class Memory extends AbstractTableModel {
 				simulate.memtable.setRowSelectionInterval(index, index);
 		}
 	}
+	
+	
 
 	public int get(int add) throws MemFaultException {
 		return get(add, true);
@@ -317,5 +319,15 @@ public class Memory extends AbstractTableModel {
 				out.println(new Address(i) + " " + new Word(memory[i].value));
 			}
 		}
+	}
+
+	public int getScrollPos(int pc) {
+		if (pc >= 0 && pc < memory.length) {
+			int index = memory[pc].mempos;
+			if (index != -1 && index < simulate.memtable.getRowCount())
+				return index;
+				
+		}
+		return 0;
 	}
 }
