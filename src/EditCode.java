@@ -63,7 +63,7 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 	StyledDocument doc;
 	ParseErrors errorlist;
 	Timer updateTimer;
-	Memory nullMemory;
+	MemoryUI nullMemory;
 	final Peanut peanut;
 //	static String lf = System.getProperty("line.separator");
 	static String lf = "\n";
@@ -84,7 +84,7 @@ public class EditCode extends JPanel implements Runnable, AdjustmentListener, Ac
 		textChangedSinceHighlight = true;
 		errorlist = null;
 		this.peanut = peanut;
-		nullMemory = new Memory(new Simulate(false,false,false));
+		nullMemory = new MemoryUI(new Simulate(false,false,false));
 		undolist = new LinkedList<UndoItem>();
 		text = new JTextPane() {
 			@Override

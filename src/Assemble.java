@@ -75,7 +75,7 @@ public class Assemble {
 	}
 
 	static Color darker(Color col) {
-		return new Color(col.getRGB()).darker();
+		return new Color(col.getRGB()).darker(); 
 	}
 
 	public static void assembleFile(String filename, Memory memory)
@@ -105,11 +105,11 @@ public class Assemble {
 		return a.errorlist;
 	}
 
-	public static ParseErrors assemble(EditCode ec, Memory memory) {
+	public static ParseErrors assemble(EditCode ec, MemoryUI memory) {
 		return assemblewithfile(ec, memory, null);
 	}
 
-	public static ParseErrors assemblewithfile(EditCode ec, Memory memory,
+	public static ParseErrors assemblewithfile(EditCode ec, MemoryUI memory,
 			String filename) {
 		Assemble a = new Assemble(memory);
 		String text = ec.text.getText();

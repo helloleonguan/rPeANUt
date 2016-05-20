@@ -27,10 +27,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 public class DebugButton extends Component implements MouseListener {
 
-	Memory memory;
+	MemoryUI memory;
 	int col;
 
-	public DebugButton(Memory mem, int col) {
+	public DebugButton(MemoryUI mem, int col) {
 		memory = mem;
 		this.col = col;
 		addMouseListener(this);

@@ -135,123 +135,129 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 		r = new Register[numReg];
 
 		for (int i = 0; i < numReg; i++) {
-			r[i] = new Register("R" + i);
+			r[i] = (Register) RegisterUI.createReg(term, "R" + i);
 		}
 
 		this.setLayout(this);
 
-		SP = new Register("SP");
+		SP = RegisterUI.createReg(term, "SP");
 
-		IR = new Register("IR");
+		IR = RegisterUI.createReg(term, "IR");
 
-		SR = new Register("SR");
-		PC = new Register("PC");
+		SR = RegisterUI.createReg(term, "SR");
+		PC = RegisterUI.createReg(term, "PC");
 
-		memory = new Memory(this);
-		memtable = new JTable(memory);
-		memtable.setRowHeight(Peanut.getUIFontHeight());
-		// memtable.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 32));
-		memtable.getColumnModel().getColumn(0).setHeaderValue("");
-		memtable.getColumnModel().getColumn(0).setMaxWidth(5);
-		memtable.getColumnModel().getColumn(0).setPreferredWidth(5);
-		memtable.getColumnModel().getColumn(0)
-				.setCellEditor(new TableCellEditor() {
-					@Override
-					public Component getTableCellEditorComponent(JTable arg0,
-							Object arg1, boolean arg2, int arg3, int arg4) {
-						memory.toggleDB(arg3);
-						return new DebugButton(memory, arg3);
-					}
-
-					@Override
-					public void addCellEditorListener(CellEditorListener arg0) {
-					}
-
-					@Override
-					public void cancelCellEditing() {
-					}
-
-					@Override
-					public Object getCellEditorValue() {
-						return null;
-					}
-
-					@Override
-					public boolean isCellEditable(EventObject arg0) {
-						return true;
-					}
-
-					@Override
-					public void removeCellEditorListener(CellEditorListener arg0) {
-					}
-
-					@Override
-					public boolean shouldSelectCell(EventObject arg0) {
-						return false;
-					}
-
-					@Override
-					public boolean stopCellEditing() {
-						return true;
-					}
-				});
-
-		memtable.getColumnModel().getColumn(0)
-				.setCellRenderer(new TableCellRenderer() {
-
-					public Component getTableCellRendererComponent(
-							JTable table, Object value, boolean isSelected,
-							boolean isFocused, int row, int col) {
-						boolean marked = (Boolean) value;
-						if (marked) {
-							return new Component() {
-
-								public void paint(java.awt.Graphics g) {
-									g.setColor(Color.blue);
-									g.fillRect(2, 2, 6, 6);
-								};
-
-							};
-						} else {
-							Component comp = new Component() {
-
-								public void paint(java.awt.Graphics g) {
-									g.setColor(Color.white);
-									g.fillRect(0, 0, 10, 10);
-								};
-
-							};
-
-							return comp;
+		memory = createMemory(term, this);
+		if (!term) {
+			memtable = new JTable((MemoryUI) memory);
+			memtable.setRowHeight(Peanut.getUIFontHeight()); 
+			// memtable.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 32));
+			memtable.getColumnModel().getColumn(0).setHeaderValue("");
+			memtable.getColumnModel().getColumn(0).setMaxWidth(5);
+			memtable.getColumnModel().getColumn(0).setPreferredWidth(5);
+			memtable.getColumnModel().getColumn(0)
+					.setCellEditor(new TableCellEditor() {
+						@Override
+						public Component getTableCellEditorComponent(
+								JTable arg0, Object arg1, boolean arg2,
+								int arg3, int arg4) {
+							((MemoryUI) memory).toggleDB(arg3);
+							return new DebugButton((MemoryUI)memory, arg3);
 						}
 
-					}
-				});
-		memtable.getColumnModel().getColumn(1).setHeaderValue("profile");
-		memtable.getColumnModel().getColumn(1).setPreferredWidth(10);
+						@Override
+						public void addCellEditorListener(
+								CellEditorListener arg0) {
+						}
 
-		memtable.getColumnModel().getColumn(2).setHeaderValue("label");
-		memtable.getColumnModel().getColumn(2).setPreferredWidth(30);
-		memtable.getColumnModel().getColumn(3).setHeaderValue("address");
-		memtable.getColumnModel().getColumn(3).setPreferredWidth(26);
-		memtable.getColumnModel().getColumn(4).setHeaderValue("data");
-		memtable.getColumnModel().getColumn(4).setPreferredWidth(55);
-		memtable.getColumnModel().getColumn(4)
-				.setCellRenderer(new CenterRender());
-		memtable.getColumnModel().getColumn(5).setHeaderValue("");
-		memtable.getColumnModel().getColumn(5).setPreferredWidth(30);
-		memtable.setFont(Peanut.setUIFont(new Font(Font.MONOSPACED, Font.PLAIN,
-				14)));
+						@Override
+						public void cancelCellEditing() {
+						}
 
-		profileColumn = memtable.getColumnModel().getColumn(1);
-		if (!profile) {
-			memtable.removeColumn(profileColumn);
+						@Override
+						public Object getCellEditorValue() {
+							return null;
+						}
+
+						@Override
+						public boolean isCellEditable(EventObject arg0) {
+							return true;
+						}
+
+						@Override
+						public void removeCellEditorListener(
+								CellEditorListener arg0) {
+						}
+
+						@Override
+						public boolean shouldSelectCell(EventObject arg0) {
+							return false;
+						}
+
+						@Override
+						public boolean stopCellEditing() {
+							return true;
+						}
+					});
+
+			memtable.getColumnModel().getColumn(0)
+					.setCellRenderer(new TableCellRenderer() {
+
+						public Component getTableCellRendererComponent(
+								JTable table, Object value, boolean isSelected,
+								boolean isFocused, int row, int col) {
+							boolean marked = (Boolean) value;
+							if (marked) {
+								return new Component() {
+
+									public void paint(java.awt.Graphics g) {
+										g.setColor(Color.blue);
+										g.fillRect(2, 2, 6, 6);
+									};
+
+								};
+							} else {
+								Component comp = new Component() {
+
+									public void paint(java.awt.Graphics g) {
+										g.setColor(Color.white);
+										g.fillRect(0, 0, 10, 10);
+									};
+
+								};
+
+								return comp;
+							}
+
+						}
+					});
+			memtable.getColumnModel().getColumn(1).setHeaderValue("profile");
+			memtable.getColumnModel().getColumn(1).setPreferredWidth(10);
+
+			memtable.getColumnModel().getColumn(2).setHeaderValue("label");
+			memtable.getColumnModel().getColumn(2).setPreferredWidth(30);
+			memtable.getColumnModel().getColumn(3).setHeaderValue("address");
+			memtable.getColumnModel().getColumn(3).setPreferredWidth(26);
+			memtable.getColumnModel().getColumn(4).setHeaderValue("data");
+			memtable.getColumnModel().getColumn(4).setPreferredWidth(55);
+			memtable.getColumnModel().getColumn(4)
+					.setCellRenderer(new CenterRender());
+			memtable.getColumnModel().getColumn(5).setHeaderValue("");
+			memtable.getColumnModel().getColumn(5).setPreferredWidth(30);
+			memtable.setFont(Peanut.setUIFont(new Font(Font.MONOSPACED,
+					Font.PLAIN, 14)));
+
+			profileColumn = memtable.getColumnModel().getColumn(1);
+			if (!profile) {
+				memtable.removeColumn(profileColumn);
+			}
+
+			memscroll = new JScrollPane(memtable);
+			memscroll.setPreferredSize(scrollsize);
+
 		}
 
-		memscroll = new JScrollPane(memtable);
-		memscroll.setPreferredSize(scrollsize);
-	
-		cache = new Cache(memory);
+		cache = createCache(term, memory);
 
 		harddisk = new HardDisk();
 
@@ -268,33 +274,51 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 
 		terminalChar = new StringBuffer();
 		terminalCharInterrupt = false;
+
 		screen = new Screen(memory);
 
 		countLabel = new JLabel("Count: " + count);
 
 		reset();
 
-		for (int i = 0; i < 8; i++) {
-			add(r[i]);
+		if (!term) {
+			for (int i = 0; i < 8; i++) {
+				add((RegisterUI) r[i]);
+			}
+
+			add((RegisterUI) SP);
+			add((RegisterUI) IR);
+			add((RegisterUI) SR);
+			add((RegisterUI) PC);
+			step = makeButton("Step");
+			run = makeButton("Run");
+			fast = makeButton("Fast");
+			slow = makeButton("Slow");
+			stop = makeButton("Stop");
+	
+
+			add(countLabel);
+
+			this.add(screen);
+			this.add(terminal);
+			this.add(memscroll);
 		}
+	}
 
-		add(SP);
-		add(IR);
-		add(SR);
-		add(PC);
+	private Memory createMemory(boolean term, Simulate simulate) {
+		if (term) {
+			return new MemoryTerm(simulate);
+		} else {
+			return new MemoryUI(simulate);
+		}
+	}
 
-		step = makeButton("Step");
-		run = makeButton("Run");
-		fast = makeButton("Fast");
-		slow = makeButton("Slow");
-		stop = makeButton("Stop");
-
-		add(countLabel);
-
-		this.add(screen);
-		this.add(terminal);
-		this.add(memscroll);
-
+	private static Cache createCache(boolean term, Memory mem) {
+		if (term) {
+			return new CacheTerm(mem);
+		} else {
+			return new CacheUI((MemoryUI) mem);
+		}
 	}
 
 	private JButton makeButton(String title) {
@@ -325,22 +349,24 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 		SR.reset();
 		terminalChar = new StringBuffer();
 		terminalCharInterrupt = false;
-		memory.fireTableDataChanged();
-		terminal.setText("");
-		screen.refreshAll();
+		if (!term) {
+			((MemoryUI) memory).fireTableDataChanged();
+			terminal.setText("");
+			screen.refreshAll();
+		}
 
 	}
 
 	public void update() {
-		memory.fireTableDataChanged();
-		memory.setHighlight();
+		((MemoryUI) memory).fireTableDataChanged();
+		((MemoryUI) memory).setHighlight();
 		countLabel.setText("Count: " + count);
 		screen.refreshAll();
 		// this.validateTree(); had some issues in java 7
 		// this.validate();
-		
-	    centerMemoryScroll();
-		
+
+		centerMemoryScroll();
+
 		this.repaint();
 	}
 
@@ -348,13 +374,13 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 		fastcount++;
 		if (fastcount >= 1000) {
 			update();
-			
+
 			fastcount = 0;
 		}
 	}
 
 	public void normalupdate() {
-		memory.setHighlight();
+		((MemoryUI) memory).setHighlight();
 		screen.refreshAll();
 		fastcount++;
 		if (fastcount >= 200) {
@@ -544,10 +570,12 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 
 		// screen.refreshAll(); // need to move this
 
-		if (memory.isDBmem(PC.get())) {
-			stoprun = true;
-		}
+		if (!term) {
+			if (((MemoryUI) memory).isDBmem(PC.get())) {
 
+				stoprun = true;
+			}
+		}
 		return true;
 	}
 
@@ -613,15 +641,19 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 		if (stoprun && !halt) {
 			step();
 			update();
-			
+
 		}
 	}
 
 	private void centerMemoryScroll() {
 		Adjustable sb = memscroll.getVerticalScrollBar();
-		int tpos = memory.getScrollPos(PC.get());
+		int tpos = ((MemoryUI) memory).getScrollPos(PC.get());
 		int rows = memtable.getRowCount();
-		sb.setValue(Math.max(0, (sb.getMaximum() * tpos / rows) - (sb.getVisibleAmount()/2)));
+		if (rows > 0) {
+			sb.setValue(Math.max(0,
+					(sb.getMaximum() * tpos / rows)
+							- (sb.getVisibleAmount() / 2)));
+		}
 	}
 
 	public void runPush() {
@@ -741,24 +773,24 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 
 		terminal.setText(content);
 	}
-	
+
 	public void terminalAppend(String str) {
-		String content = terminal.getText() + "\n" + wrapit(TERMINALWIDTH,TERMINALLINES,str);
+		String content = terminal.getText() + "\n"
+				+ wrapit(TERMINALWIDTH, TERMINALLINES, str);
 		while (countlines(content) > TERMINALLINES) {
 			content = content.substring(content.indexOf('\n') + 1);
 		}
 		terminal.setText(content);
 	}
-	
 
 	private String wrapit(int w, int l, String str) {
 		int pos = 0;
 		StringBuffer res = new StringBuffer();
 		if (str.length() > w * l) {
-			pos = str.length() - w*l;
+			pos = str.length() - w * l;
 		}
 		while (pos < str.length()) {
-			res.append(str.substring(pos, Math.min(pos+w,str.length())));
+			res.append(str.substring(pos, Math.min(pos + w, str.length())));
 			res.append("\n");
 			pos += w;
 		}
@@ -819,8 +851,8 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 	@Override
 	public void layoutContainer(Container arg0) {
 		Dimension size = this.getSize();
-		Dimension rs = SP.getPreferredSize();
-		
+		Dimension rs = ((RegisterUI) SP).getPreferredSize();
+
 		int r2x = size.width - rs.width;
 		int r1x = size.width - 2 * rs.width;
 		int ry = 0;
@@ -828,12 +860,17 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 
 		int idx = 1;
 		for (int i = 0; i < 8; i++)
-			r[i].setBounds(r2x, idx++ * rs.height, rs.width, rs.height);
+			((RegisterUI) r[i]).setBounds(r2x, idx++ * rs.height, rs.width,
+					rs.height);
 
-		SP.setBounds(r2x, (idx++) * rs.height, rs.width, rs.height);
-		IR.setBounds(r2x, (idx++) * rs.height, rs.width, rs.height);
-		SR.setBounds(r2x, (idx++) * rs.height, rs.width, rs.height);
-		PC.setBounds(r2x, (idx++) * rs.height, rs.width, rs.height);
+		((RegisterUI) SP).setBounds(r2x, (idx++) * rs.height, rs.width,
+				rs.height);
+		((RegisterUI) IR).setBounds(r2x, (idx++) * rs.height, rs.width,
+				rs.height);
+		((RegisterUI) SR).setBounds(r2x, (idx++) * rs.height, rs.width,
+				rs.height);
+		((RegisterUI) PC).setBounds(r2x, (idx++) * rs.height, rs.width,
+				rs.height);
 
 		countLabel.setBounds(r2x, (idx++) * rs.height, rs.width, rs.height);
 
@@ -871,14 +908,14 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 
 	@Override
 	public Dimension minimumLayoutSize(Container arg0) {
-		Dimension rs = SP.getMinimumSize();
+		Dimension rs = ((RegisterUI) SP).getMinimumSize();
 		return new Dimension(Simulate.SCREENWIDTH * 3 / 2, rs.height
 				* (8 + 4 + 1) + Simulate.SCREENHEIGHT);
 	}
 
 	@Override
 	public Dimension preferredLayoutSize(Container arg0) {
-		Dimension rs = SP.getMinimumSize();
+		Dimension rs = ((RegisterUI) SP).getMinimumSize();
 		return new Dimension(rs.width * 5, rs.height * (8 + 4 + 1) + 2
 				* Simulate.SCREENHEIGHT);
 	}
@@ -892,57 +929,54 @@ public class Simulate extends JPanel implements ActionListener, KeyListener,
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		D.p("mouse clicked " + e);
-		
-		 if (SwingUtilities.isMiddleMouseButton(e)) {
-			 D.p(" middle buttle ");
-			 Clipboard cb = getToolkit().getSystemClipboard();
-             Transferable trans = cb.getContents(this);
-           
-               
-                 try {
-                	String str =  (String) trans.getTransferData(DataFlavor.stringFlavor);
-                    D.p("str:" + str);
-                    
-                	terminalChar.append(str);
-    				if (echoInput) {
-    					terminalAppend(str);
-    				}
-                    
-                 } catch (UnsupportedFlavorException | IOException ex) {
-                    D.p("problem " + ex);
-                 }
-		    
-		 }
-				 
-				 
-				 //isRightMouseButton(e)) {
 
-             
-		
+		if (SwingUtilities.isMiddleMouseButton(e)) {
+			D.p(" middle buttle ");
+			Clipboard cb = getToolkit().getSystemClipboard();
+			Transferable trans = cb.getContents(this);
+
+			try {
+				String str = (String) trans
+						.getTransferData(DataFlavor.stringFlavor);
+				D.p("str:" + str);
+
+				terminalChar.append(str);
+				if (echoInput) {
+					terminalAppend(str);
+				}
+
+			} catch (UnsupportedFlavorException | IOException ex) {
+				D.p("problem " + ex);
+			}
+
+		}
+
+		// isRightMouseButton(e)) {
+
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseExited(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mousePressed(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

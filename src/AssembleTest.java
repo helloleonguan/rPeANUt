@@ -65,7 +65,7 @@ public class AssembleTest {
 		simequiv.reset();
 		Assemble.assembleFile(filenameequiv, simequiv.memory);
 		
-		for (int i = 0; i < Memory.addressSize; i++) {
+		for (int i = 0; i < MemoryUI.addressSize; i++) {
 			assertEquals(sim.memory.get(i), simequiv.memory.get(i));
 		}
 	}

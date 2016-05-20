@@ -264,7 +264,7 @@ public class Peanut implements ActionListener, LayoutManager,
 		simulate = new Simulate(false, prefs.getBoolean("echo", false),
 				prefs.getBoolean("profile", false));
 		split.setRightComponent(simulate);
-		simulate.cache.setLocationRelativeTo(jframe);
+		((CacheUI) (simulate.cache)).setLocationRelativeTo(jframe);
 		jframe.addWindowFocusListener(this);
 
 		mainpanel.add(split);
@@ -360,7 +360,7 @@ public class Peanut implements ActionListener, LayoutManager,
 		} else if (ae.getActionCommand().equals(PIPEFILELAST)) {
 				pipeFileLast();
 		} else if (ae.getActionCommand().equals(SHOWCACHE)) {
-			simulate.cache.setVisible(true);
+			((CacheUI) (simulate.cache)).setVisible(true);
 		}
 	}
 
@@ -486,7 +486,7 @@ public class Peanut implements ActionListener, LayoutManager,
 	}
 
 	private void exit() {
-		simulate.cache.setAlwaysOnTop(false);
+		((CacheUI) (simulate.cache)).setAlwaysOnTop(false);
 		if (editcode.changedFile) {
 			Object[] options = { "Save and exit", "Exit without saving",
 					"Cancel" };
@@ -506,7 +506,7 @@ public class Peanut implements ActionListener, LayoutManager,
 		} else {
 			System.exit(0);
 		}
-		simulate.cache.setAlwaysOnTop(true);
+		((CacheUI) (simulate.cache)).setAlwaysOnTop(true);
 	}
 
 	private void save() {
@@ -639,7 +639,7 @@ public class Peanut implements ActionListener, LayoutManager,
                         simulate.reset();
 						ArrayList<ParseError> errorlist = Assemble.assemble(
 								text, simulate.memory);
-						if (errorlist.size() > 0) {
+						if (errorlist.size() > 0) { 
 							System.out.println("Problem : " + errorlist);
 							System.exit(1);
 						}
@@ -765,13 +765,13 @@ public class Peanut implements ActionListener, LayoutManager,
 	@Override
 	public void windowGainedFocus(WindowEvent e) {
 		D.p("focus gained");
-		simulate.cache.setAlwaysOnTop(true);
+		((CacheUI) (simulate.cache)).setAlwaysOnTop(true);
 	}
 
 	@Override
 	public void windowLostFocus(WindowEvent e) {
 		D.p("focus lost");
-		simulate.cache.setAlwaysOnTop(false);
+		((CacheUI) (simulate.cache)).setAlwaysOnTop(false);
 	}
 
 	public static int getUIFontHeight() {
