@@ -207,6 +207,9 @@ public class MySimpleTokenizer extends Tokenizer {
 			pos++;
 		int epos = pos;
 		pos = spos;
+		//System.out.println("text:" + text + ":" + epos + ":" + spos);
+		if (spos == epos) return "";
+		else 
 		return text.substring(spos, epos);
 	}
 
